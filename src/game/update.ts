@@ -1,5 +1,5 @@
 import { bulletGroups } from './game-init'
-import { shipSettings } from './consts'
+import { shipSettings, gameSettings } from './consts'
 import { players, Player } from './player'
 import { Bullet } from './bullet'
 
@@ -67,6 +67,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
         player.body.velocity.x + unitVelocity.x * shipSettings.acceleration,
         player.body.velocity.y + unitVelocity.y * shipSettings.acceleration
       )
+      player.thrustEffect()
     }
 
     const fireButtonPressed = this.input.gamepad?.gamepads[player.number]?.buttons.some(
@@ -79,6 +80,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
       if (bullet) {
         bullet.fire(player)
 
+        player.scoreUpdate(gameSettings.shootScorePenalty)
         player.lastFired = this.time.now + shipSettings.fireRate
       }
     }

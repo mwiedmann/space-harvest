@@ -15,7 +15,9 @@ export const shipSettings = {
 export const gameSettings = {
   screenWidth: 1800,
   screenHeight: 900,
-  worldBoundEdgeSize: 32
+  worldBoundEdgeSize: 32,
+  deathScorePenalty: -1000,
+  shootScorePenalty: -5
 }
 
 export const settingsHelpers = {
@@ -24,9 +26,9 @@ export const settingsHelpers = {
   worldBoundWidth: gameSettings.screenWidth + 2 * gameSettings.worldBoundEdgeSize,
   worldBoundHeight: gameSettings.screenHeight + 2 * gameSettings.worldBoundEdgeSize,
   playerStartingLocations: [
-    { x: 200, y: 200 },
-    { x: gameSettings.screenWidth - 200, y: gameSettings.screenHeight - 200 },
-    { x: 200, y: gameSettings.screenHeight - 200 },
-    { x: gameSettings.screenWidth - 200, y: 200 }
+    { x: 400, y: 200 },
+    { x: gameSettings.screenWidth - 400, y: gameSettings.screenHeight - 200 },
+    { x: 400, y: gameSettings.screenHeight - 200 },
+    { x: gameSettings.screenWidth - 400, y: 200 }
   ]
 }

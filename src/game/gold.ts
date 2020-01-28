@@ -7,7 +7,7 @@ export class Gold extends Phaser.Physics.Arcade.Image {
     super(scene, 0, 0, 'gold')
   }
 
-  value = 10
+  value = 100
 
   spawn(x: number, y: number) {
     this.setActive(true)

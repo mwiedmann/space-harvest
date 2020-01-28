@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { shipSettings, settingsHelpers } from './consts'
+import { shipSettings, settingsHelpers, gameSettings } from './consts'
 import { goldNuggets, bases } from './game-init'
 import { Gold } from './gold'
 import { RockGold } from './rock-gold'
@@ -9,16 +9,19 @@ import { Bullet } from './bullet'
 
 export const players: Player[] = []
 
-function collectGold(playerObj: Phaser.GameObjects.GameObject, goldObj: Phaser.GameObjects.GameObject): void {
+function playerCollectGold(playerObj: Phaser.GameObjects.GameObject, goldObj: Phaser.GameObjects.GameObject): void {
   const gold = goldObj as Gold
   const player = playerObj as Player
 
-  player.score += gold.value
+  player.scoreUpdate(gold.value)
 
   gold.done()
 }
 
-export function crashIntoRock(playerObj: Phaser.GameObjects.GameObject, rockObj: Phaser.GameObjects.GameObject): void {
+export function playerCrashIntoRock(
+  playerObj: Phaser.GameObjects.GameObject,
+  rockObj: Phaser.GameObjects.GameObject
+): void {
   const rock = rockObj as RockGold
   const player = playerObj as Player
 
@@ -26,14 +29,33 @@ export function crashIntoRock(playerObj: Phaser.GameObjects.GameObject, rockObj:
   player.died()
 }
 
-export function hitBuyBullet(playerObj: Phaser.GameObjects.GameObject, bulletObj: Phaser.GameObjects.GameObject): void {
+export function playerCrashIntoBase(
+  playerObj: Phaser.GameObjects.GameObject,
+  baseObj: Phaser.GameObjects.GameObject
+): boolean {
+  const base = baseObj as Base
+  const player = playerObj as Player
+
+  if (base.playerNumber !== player.number) {
+    player.died()
+    return true
+  }
+  return false
+}
+
+export function playerHitByBullet(
+  playerObj: Phaser.GameObjects.GameObject,
+  bulletObj: Phaser.GameObjects.GameObject
+): boolean {
   const bullet = bulletObj as Bullet
   const player = playerObj as Player
 
   if (bullet.playerNumber !== player.number) {
     bullet.done()
     player.died()
+    return true
   }
+  return false
 }
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
@@ -44,6 +66,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.baseX = baseLocation.x
     this.baseY = baseLocation.y
     const base = bases.get() as Base
+    base.playerNumber = number
     base.spawn(baseLocation.x, baseLocation.y)
 
     scene.add.existing(this)
@@ -58,7 +81,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     pb.setGravity(0, 0)
 
     // this.body.mass = 4
-    scene.physics.add.overlap(this, goldNuggets, collectGold, undefined, scene)
+    scene.physics.add.overlap(this, goldNuggets, playerCollectGold, undefined, scene)
 
     // Player starts "dead" and can't move/fire for a few moments
     this.diedTime = this.scene.time.now - (shipSettings.deadTime - 1000)
@@ -71,6 +94,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(false)
     this.body.stop()
 
+    this.scoreText = scene.add.text(baseLocation.x - 32, baseLocation.y - 32, this.score.toString(), {
+      color: 'yellow'
+    })
+
     // this.setCollideWorldBounds(true)
     // // Typing error? Doesn't work without this but says is readoly
     // const db: any = this.body
@@ -80,7 +107,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
   spawnParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
-  score = 0
+  scoreText: Phaser.GameObjects.Text
+
+  private score = 10000
+
   lastFired = 0
 
   baseX: number
@@ -88,6 +118,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   diedTime: number
   dead = true
+
+  scoreUpdate(points: number) {
+    this.score += points
+    this.scoreText.text = this.score.toString()
+  }
 
   update(time: number, delta: number) {
     if (this.dead) {
@@ -98,6 +133,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       const { x: newX, y: newY } = edgeCollideSetPosition(this.x, this.y)
       this.setPosition(newX, newY)
     }
+  }
+
+  thrustEffect() {
+    const directionVector = this.scene.physics.velocityFromRotation(this.rotation, 12)
+
+    this.fireParticleManager.createEmitter({
+      blendMode: 'ADD',
+      lifespan: 500,
+      maxParticles: 1,
+      alpha: 0.5,
+      scale: { start: 0.7, end: 0 },
+      x: this.x - directionVector.x,
+      y: this.y - directionVector.y
+    })
   }
 
   respawnEffect() {
@@ -122,6 +171,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   died() {
+    this.scoreUpdate(gameSettings.deathScorePenalty)
     this.fireParticleManager.createEmitter({
       speed: 50,
       blendMode: 'ADD',

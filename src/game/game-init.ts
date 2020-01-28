@@ -4,8 +4,8 @@ import { update } from './update'
 import { Gold } from './gold'
 import { settingsHelpers, gameSettings } from './consts'
 import { RockGold, shootRock } from './rock-gold'
-import { players, crashIntoRock, hitBuyBullet } from './player'
-import { Base } from './base'
+import { players, playerCrashIntoRock, playerHitByBullet, playerCrashIntoBase } from './player'
+import { Base, baseHitByBullet, baseHitByRock, baseCollectGold } from './base'
 
 export let bulletGroups: Phaser.Physics.Arcade.Group[] = []
 export let goldNuggets: Phaser.Physics.Arcade.Group
@@ -92,9 +92,14 @@ function create(this: Phaser.Scene) {
 
   this.physics.add.collider(rockGoldBoulders, bulletGroups[0], shootRock)
   this.physics.add.collider(rockGoldBoulders, bulletGroups[1], shootRock)
-  this.physics.add.collider(players, rockGoldBoulders, crashIntoRock)
-  this.physics.add.collider(players, bulletGroups[0], hitBuyBullet)
-  this.physics.add.collider(players, bulletGroups[1], hitBuyBullet)
+  this.physics.add.collider(players, rockGoldBoulders, playerCrashIntoRock)
+  this.physics.add.collider(players, bases, undefined, playerCrashIntoBase)
+  this.physics.add.collider(players, bulletGroups[0], undefined, playerHitByBullet)
+  this.physics.add.collider(players, bulletGroups[1], undefined, playerHitByBullet)
+  this.physics.add.collider(bases, bulletGroups[0], undefined, baseHitByBullet)
+  this.physics.add.collider(bases, bulletGroups[1], undefined, baseHitByBullet)
+  this.physics.add.collider(bases, rockGoldBoulders, baseHitByRock)
+  this.physics.add.collider(bases, goldNuggets, baseCollectGold)
 }
 
 export const startGame = () => {
