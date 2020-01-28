@@ -1,5 +1,7 @@
 {
-  "name": "my-game",
+  "name": "space-harvest",
+  "license": "none",
+  "author": "Mark Wiedmann <mrwieds@gmail.com>",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
