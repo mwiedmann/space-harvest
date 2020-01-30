@@ -1,15 +1,35 @@
 import * as Phaser from 'phaser'
-import { goldNuggets } from './game-init'
+import { minerals } from './game-init'
 import { edgeCollideSetPosition, outOfBounds } from './wrappable'
 
-export class Gold extends Phaser.Physics.Arcade.Image {
+const randomMineral = () => {
+  const r = Phaser.Math.RND.integerInRange(0, 100)
+
+  if (r < 10) {
+    return 3
+  } else if (r < 30) {
+    return 2
+  } else if (r < 60) {
+    return 1
+  } else {
+    return 0
+  }
+}
+
+const mineralValue = [100, 250, 500, 1000]
+
+export class Mineral extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene) {
-    super(scene, 0, 0, 'gold')
+    super(scene, 0, 0, 'mineral', randomMineral())
   }
 
-  value = 100
+  value = 0
 
   spawn(x: number, y: number) {
+    const mineralType = randomMineral()
+    this.value = mineralValue[mineralType]
+    this.setFrame(mineralType)
+
     this.setActive(true)
     this.setVisible(true)
 
@@ -37,6 +57,6 @@ export class Gold extends Phaser.Physics.Arcade.Image {
     // this.setActive(false)
     // this.setVisible(false)
     // this.body.stop()
-    goldNuggets.remove(this, true)
+    minerals.remove(this, true)
   }
 }

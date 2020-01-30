@@ -1,15 +1,15 @@
 import * as Phaser from 'phaser'
 import { Bullet } from './bullet'
 import { update } from './update'
-import { Gold } from './gold'
+import { Mineral } from './mineral'
 import { settingsHelpers, gameSettings } from './consts'
-import { RockGold, shootRock } from './rock-gold'
+import { Asteroid, shootRock } from './asteroid'
 import { players, playerCrashIntoRock, playerHitByBullet, playerCrashIntoBase } from './player'
-import { Base, baseHitByBullet, baseHitByRock, baseCollectGold } from './base'
+import { Base, baseHitByBullet, baseHitByRock, baseCollectMineral } from './base'
 
 export let bulletGroups: Phaser.Physics.Arcade.Group[] = []
-export let goldNuggets: Phaser.Physics.Arcade.Group
-export let rockGoldBoulders: Phaser.Physics.Arcade.Group
+export let minerals: Phaser.Physics.Arcade.Group
+export let asteroids: Phaser.Physics.Arcade.Group
 export let bases: Phaser.Physics.Arcade.StaticGroup
 
 function preload(this: Phaser.Scene) {
@@ -18,8 +18,8 @@ function preload(this: Phaser.Scene) {
   this.load.image('ship1', 'images/ship1.png')
   this.load.image('bullet0', 'images/bullet0.png')
   this.load.image('bullet1', 'images/bullet1.png')
-  this.load.image('gold', 'images/gold.png')
-  this.load.spritesheet('rock-gold', 'images/asteroid-sprite.png', { frameWidth: 64, frameHeight: 64 })
+  this.load.spritesheet('mineral', 'images/mineral-sprite.png', { frameWidth: 16, frameHeight: 16 })
+  this.load.spritesheet('asteroid', 'images/asteroid-sprite.png', { frameWidth: 64, frameHeight: 64 })
   this.load.image('base', 'images/base.png')
   this.load.image('fire1', 'images/fire1.png')
   this.load.image('rubble', 'images/rubble.png')
@@ -38,14 +38,14 @@ function create(this: Phaser.Scene) {
     )
   }
 
-  goldNuggets = this.physics.add.group({
-    classType: Gold,
+  minerals = this.physics.add.group({
+    classType: Mineral,
     maxSize: 75,
     runChildUpdate: true
   })
 
-  rockGoldBoulders = this.physics.add.group({
-    classType: RockGold,
+  asteroids = this.physics.add.group({
+    classType: Asteroid,
     maxSize: 10,
     runChildUpdate: true
   })
@@ -60,11 +60,11 @@ function create(this: Phaser.Scene) {
     delay: 2000,
     loop: true,
     callback: () => {
-      if (goldNuggets.countActive() === 25) {
+      if (minerals.countActive() === 25) {
         return
       }
 
-      let rock = rockGoldBoulders.get() as RockGold
+      let rock = asteroids.get() as Asteroid
 
       if (rock) {
         rock.spawn()
@@ -86,20 +86,16 @@ function create(this: Phaser.Scene) {
     }
   })
 
-  // this.physics.add.collider(goldNuggets, goldNuggets)
-  // this.physics.add.collider(rockGoldBoulders, rockGoldBoulders)
-  // this.physics.add.collider(goldNuggets, rockGoldBoulders)
-
-  this.physics.add.collider(rockGoldBoulders, bulletGroups[0], shootRock)
-  this.physics.add.collider(rockGoldBoulders, bulletGroups[1], shootRock)
-  this.physics.add.collider(players, rockGoldBoulders, playerCrashIntoRock)
+  this.physics.add.collider(asteroids, bulletGroups[0], shootRock)
+  this.physics.add.collider(asteroids, bulletGroups[1], shootRock)
+  this.physics.add.collider(players, asteroids, playerCrashIntoRock)
   this.physics.add.collider(players, bases, undefined, playerCrashIntoBase)
   this.physics.add.collider(players, bulletGroups[0], undefined, playerHitByBullet)
   this.physics.add.collider(players, bulletGroups[1], undefined, playerHitByBullet)
   this.physics.add.collider(bases, bulletGroups[0], undefined, baseHitByBullet)
   this.physics.add.collider(bases, bulletGroups[1], undefined, baseHitByBullet)
-  this.physics.add.collider(bases, rockGoldBoulders, baseHitByRock)
-  this.physics.add.collider(bases, goldNuggets, baseCollectGold)
+  this.physics.add.collider(bases, asteroids, baseHitByRock)
+  this.physics.add.collider(bases, minerals, baseCollectMineral)
 }
 
 export const startGame = () => {

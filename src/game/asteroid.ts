@@ -1,24 +1,24 @@
 import * as Phaser from 'phaser'
 import { gameSettings } from './consts'
-import { goldNuggets, rockGoldBoulders } from './game-init'
+import { minerals, asteroids } from './game-init'
 import { Bullet } from './bullet'
-import { Gold } from './gold'
+import { Mineral } from './mineral'
 import { edgeCollideSetPosition, outOfBounds } from './wrappable'
 
 export function shootRock(rockObj: Phaser.GameObjects.GameObject, bulletObj: Phaser.GameObjects.GameObject): void {
   // if (!rockObj.active || !bulletObj.active) {
   //   return
   // }
-  const rock = rockObj as RockGold
+  const rock = rockObj as Asteroid
   const bullet = bulletObj as Bullet
 
   bullet.done()
   rock.breakApart()
 }
 
-export class RockGold extends Phaser.Physics.Arcade.Sprite {
+export class Asteroid extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene) {
-    super(scene, 0, 0, 'rock-gold', Phaser.Math.RND.integerInRange(0, 3))
+    super(scene, 0, 0, 'asteroid', Phaser.Math.RND.integerInRange(0, 3))
 
     this.rubbleParticleManager = this.scene.add.particles(`rubble`)
   }
@@ -76,13 +76,13 @@ export class RockGold extends Phaser.Physics.Arcade.Sprite {
       y: this.y
     })
 
-    const nuggets = Math.ceil(Phaser.Math.RND.integerInRange(0, 5))
+    const nuggets = Math.ceil(Phaser.Math.RND.integerInRange(1, 5))
 
     for (let i = 0; i < nuggets; i++) {
-      let gold = goldNuggets.get() as Gold
+      let mineral = minerals.get() as Mineral
 
-      if (gold) {
-        gold.spawn(this.x, this.y)
+      if (mineral) {
+        mineral.spawn(this.x, this.y)
       }
     }
     this.done()
@@ -99,6 +99,6 @@ export class RockGold extends Phaser.Physics.Arcade.Sprite {
     // this.setActive(false)
     // this.setVisible(false)
     // this.body.stop()
-    rockGoldBoulders.remove(this, true)
+    asteroids.remove(this, true)
   }
 }

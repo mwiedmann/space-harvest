@@ -1,28 +1,31 @@
 import * as Phaser from 'phaser'
 import { shipSettings, settingsHelpers, gameSettings } from './consts'
-import { goldNuggets, bases } from './game-init'
-import { Gold } from './gold'
-import { RockGold } from './rock-gold'
+import { minerals, bases } from './game-init'
+import { Mineral } from './mineral'
+import { Asteroid } from './asteroid'
 import { Base } from './base'
 import { edgeCollideSetPosition, outOfBounds } from './wrappable'
 import { Bullet } from './bullet'
 
 export const players: Player[] = []
 
-function playerCollectGold(playerObj: Phaser.GameObjects.GameObject, goldObj: Phaser.GameObjects.GameObject): void {
-  const gold = goldObj as Gold
+function playerCollectMineral(
+  playerObj: Phaser.GameObjects.GameObject,
+  mineralObj: Phaser.GameObjects.GameObject
+): void {
+  const mineral = mineralObj as Mineral
   const player = playerObj as Player
 
-  player.scoreUpdate(gold.value)
+  player.scoreUpdate(mineral.value)
 
-  gold.done()
+  mineral.done()
 }
 
 export function playerCrashIntoRock(
   playerObj: Phaser.GameObjects.GameObject,
   rockObj: Phaser.GameObjects.GameObject
 ): void {
-  const rock = rockObj as RockGold
+  const rock = rockObj as Asteroid
   const player = playerObj as Player
 
   rock.breakApart()
@@ -81,7 +84,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     pb.setGravity(0, 0)
 
     // this.body.mass = 4
-    scene.physics.add.overlap(this, goldNuggets, playerCollectGold, undefined, scene)
+    scene.physics.add.overlap(this, minerals, playerCollectMineral, undefined, scene)
 
     // Player starts "dead" and can't move/fire for a few moments
     this.diedTime = this.scene.time.now - (shipSettings.deadTime - 1000)

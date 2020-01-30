@@ -1,8 +1,8 @@
 import * as Phaser from 'phaser'
 import { bases } from './game-init'
 import { Bullet } from './bullet'
-import { RockGold } from './rock-gold'
-import { Gold } from './gold'
+import { Asteroid } from './asteroid'
+import { Mineral } from './mineral'
 import { players } from './player'
 
 export function baseHitByBullet(
@@ -20,18 +20,21 @@ export function baseHitByBullet(
 }
 
 export function baseHitByRock(baseObj: Phaser.GameObjects.GameObject, rockObj: Phaser.GameObjects.GameObject): void {
-  const rock = rockObj as RockGold
+  const rock = rockObj as Asteroid
 
   rock.breakApart()
 }
 
-export function baseCollectGold(baseObj: Phaser.GameObjects.GameObject, goldObj: Phaser.GameObjects.GameObject): void {
-  const gold = goldObj as Gold
+export function baseCollectMineral(
+  baseObj: Phaser.GameObjects.GameObject,
+  mineralObj: Phaser.GameObjects.GameObject
+): void {
+  const mineral = mineralObj as Mineral
   const base = baseObj as Base
 
-  players.find(p => p.number === base.playerNumber)?.scoreUpdate(gold.value)
+  players.find(p => p.number === base.playerNumber)?.scoreUpdate(mineral.value)
 
-  gold.done()
+  mineral.done()
 }
 
 export class Base extends Phaser.Physics.Arcade.Image {
