@@ -13,17 +13,17 @@ export class Gold extends Phaser.Physics.Arcade.Image {
     this.setActive(true)
     this.setVisible(true)
 
-    this.setAngle(Math.random() * 360)
+    this.setAngle(Phaser.Math.RND.integerInRange(0, 360))
     this.setPosition(x, y)
     // this.body.mass = 1
     this.body.reset(x, y)
 
     const unitVelocity = this.scene.physics.velocityFromRotation(this.rotation, 1)
 
-    this.body.velocity.x = unitVelocity.x * (25 + Math.random() * 75)
-    this.body.velocity.y = unitVelocity.y * (25 + Math.random() * 75)
+    this.body.velocity.x = unitVelocity.x * (25 + Phaser.Math.RND.integerInRange(0, 75))
+    this.body.velocity.y = unitVelocity.y * (25 + Phaser.Math.RND.integerInRange(0, 75))
 
-    this.setAngularVelocity(Math.random() * 400 - 200)
+    this.setAngularVelocity(Phaser.Math.RND.integerInRange(0, 400) - 200)
   }
 
   update(time: number, delta: number) {

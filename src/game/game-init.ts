@@ -19,7 +19,7 @@ function preload(this: Phaser.Scene) {
   this.load.image('bullet0', 'images/bullet0.png')
   this.load.image('bullet1', 'images/bullet1.png')
   this.load.image('gold', 'images/gold.png')
-  this.load.image('rock-gold', 'images/rock-gold.png')
+  this.load.spritesheet('rock-gold', 'images/asteroid-sprite.png', { frameWidth: 64, frameHeight: 64 })
   this.load.image('base', 'images/base.png')
   this.load.image('fire1', 'images/fire1.png')
   this.load.image('rubble', 'images/rubble.png')

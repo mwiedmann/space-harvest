@@ -16,9 +16,9 @@ export function shootRock(rockObj: Phaser.GameObjects.GameObject, bulletObj: Pha
   rock.breakApart()
 }
 
-export class RockGold extends Phaser.Physics.Arcade.Image {
+export class RockGold extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene) {
-    super(scene, 0, 0, 'rock-gold')
+    super(scene, 0, 0, 'rock-gold', Phaser.Math.RND.integerInRange(0, 3))
 
     this.rubbleParticleManager = this.scene.add.particles(`rubble`)
   }
@@ -29,25 +29,25 @@ export class RockGold extends Phaser.Physics.Arcade.Image {
     this.setActive(true)
     this.setVisible(true)
 
-    this.setAngle(Math.random() * 360)
+    this.setAngle(Phaser.Math.RND.integerInRange(0, 360))
     let x: number
     let y: number
 
     // Position just outside of the screen randomly
-    if (Math.random() < 0.5) {
-      if (Math.random() < 0.5) {
+    if (Phaser.Math.RND.normal() < 0) {
+      if (Phaser.Math.RND.normal() < 0) {
         x = 0
-        y = Math.random() * gameSettings.screenHeight
+        y = Phaser.Math.RND.integerInRange(0, gameSettings.screenHeight)
       } else {
-        x = Math.random() * gameSettings.screenWidth
+        x = Phaser.Math.RND.integerInRange(0, gameSettings.screenWidth)
         y = 0
       }
     } else {
-      if (Math.random() < 0.5) {
+      if (Phaser.Math.RND.normal() < 0) {
         x = gameSettings.screenWidth
-        y = Math.random() * gameSettings.screenHeight
+        y = Phaser.Math.RND.integerInRange(0, gameSettings.screenHeight)
       } else {
-        x = Math.random() * gameSettings.screenWidth
+        x = Phaser.Math.RND.integerInRange(0, gameSettings.screenWidth)
         y = gameSettings.screenHeight
       }
     }
@@ -58,10 +58,10 @@ export class RockGold extends Phaser.Physics.Arcade.Image {
 
     const unitVelocity = this.scene.physics.velocityFromRotation(this.rotation, 1)
 
-    this.body.velocity.x = unitVelocity.x * (25 + Math.random() * 75)
-    this.body.velocity.y = unitVelocity.y * (25 + Math.random() * 75)
+    this.body.velocity.x = unitVelocity.x * (25 + Phaser.Math.RND.integerInRange(0, 75))
+    this.body.velocity.y = unitVelocity.y * (25 + Phaser.Math.RND.integerInRange(0, 75))
 
-    this.setAngularVelocity(Math.random() * 400 - 200)
+    this.setAngularVelocity(Phaser.Math.RND.integerInRange(0, 400) - 200)
   }
 
   breakApart() {
@@ -76,7 +76,7 @@ export class RockGold extends Phaser.Physics.Arcade.Image {
       y: this.y
     })
 
-    const nuggets = Math.ceil(Math.random() * 5)
+    const nuggets = Math.ceil(Phaser.Math.RND.integerInRange(0, 5))
 
     for (let i = 0; i < nuggets; i++) {
       let gold = goldNuggets.get() as Gold

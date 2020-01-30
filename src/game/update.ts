@@ -60,7 +60,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
         Math.abs(vertStick) > stickSensitivity
           ? Math.abs(vertStick)
           : (player.number === 0 && cursors.up?.isDown) || thrustButtonPressed
-          ? 1
+          ? 0.5
           : 0
       const unitVelocity = this.physics.velocityFromRotation(player.rotation, amount)
       player.setVelocity(
