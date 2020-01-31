@@ -1,11 +1,29 @@
-import { bulletGroups } from './game-init'
+import { bulletGroups, aliens } from './game-init'
 import { shipSettings, gameSettings } from './consts'
 import { players, Player } from './player'
 import { Bullet } from './bullet'
+import { Alien, alienData } from './alien'
 
 const stickSensitivity = 0.3
 
 export function update(this: Phaser.Scene, time: number, delta: number) {
+  // Set the time for the 1st alien spawn
+  if (!alienData.nextAlienSpawn) {
+    alienData.nextAlienSpawn =
+      this.time.now + Phaser.Math.RND.integerInRange(gameSettings.alienSpawnMinTime, gameSettings.alientSpawnMaxTime)
+  }
+
+  // Check if the alien needs to be respawned
+  if (alienData.nextAlienSpawn <= this.time.now) {
+    alienData.nextAlienSpawn =
+      this.time.now + Phaser.Math.RND.integerInRange(gameSettings.alienSpawnMinTime, gameSettings.alientSpawnMaxTime)
+    const alien = aliens.get() as Alien
+
+    if (alien) {
+      alien.spawn()
+    }
+  }
+
   const cursors = this.input.keyboard.createCursorKeys()
   let newPlayer: Player
 

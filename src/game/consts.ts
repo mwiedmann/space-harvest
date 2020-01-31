@@ -17,7 +17,9 @@ export const gameSettings = {
   screenHeight: 900,
   worldBoundEdgeSize: 32,
   deathScorePenalty: -1000,
-  shootScorePenalty: -5
+  shootScorePenalty: -5,
+  alienSpawnMinTime: 5000,
+  alientSpawnMaxTime: 15000
 }
 
 export const settingsHelpers = {

@@ -24,10 +24,8 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     this.setPosition(ship.x, ship.y)
     this.body.reset(ship.x, ship.y)
 
-    const unitVelocity = this.scene.physics.velocityFromRotation(ship.rotation, 1)
-
-    this.body.velocity.x = ship.body.velocity.x + unitVelocity.x * shipSettings.bulletSpeed
-    this.body.velocity.y = ship.body.velocity.y + unitVelocity.y * shipSettings.bulletSpeed
+    const newVelocity = this.scene.physics.velocityFromRotation(ship.rotation, shipSettings.bulletSpeed)
+    this.setVelocity(newVelocity.x, newVelocity.y)
 
     this.lifespan = shipSettings.bulletLifetime
 

@@ -58,10 +58,11 @@ export class Mineral extends Phaser.Physics.Arcade.Sprite {
     // this.body.mass = 1
     this.body.reset(x, y)
 
-    const unitVelocity = this.scene.physics.velocityFromRotation(this.rotation, 1)
-
-    this.body.velocity.x = unitVelocity.x * (25 + Phaser.Math.RND.integerInRange(0, 75))
-    this.body.velocity.y = unitVelocity.y * (25 + Phaser.Math.RND.integerInRange(0, 75))
+    const newVelocity = this.scene.physics.velocityFromRotation(
+      this.rotation,
+      25 + Phaser.Math.RND.integerInRange(0, 75)
+    )
+    this.setVelocity(newVelocity.x, newVelocity.y)
 
     this.setAngularVelocity(Phaser.Math.RND.integerInRange(0, 400) - 200)
   }

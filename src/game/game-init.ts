@@ -6,10 +6,12 @@ import { settingsHelpers, gameSettings } from './consts'
 import { Asteroid, shootRock } from './asteroid'
 import { players, playerCrashIntoRock, playerHitByBullet, playerCrashIntoBase } from './player'
 import { Base, baseHitByBullet, baseHitByRock, baseCollectMineral } from './base'
+import { alienCrashIntoRock, alienHitByBullet, Alien } from './alien'
 
 export let bulletGroups: Phaser.Physics.Arcade.Group[] = []
 export let minerals: Phaser.Physics.Arcade.Group
 export let asteroids: Phaser.Physics.Arcade.Group
+export let aliens: Phaser.Physics.Arcade.Group
 export let bases: Phaser.Physics.Arcade.StaticGroup
 
 function preload(this: Phaser.Scene) {
@@ -18,17 +20,19 @@ function preload(this: Phaser.Scene) {
   this.load.image('ship1', 'images/ship1.png')
   this.load.image('bullet0', 'images/bullet0.png')
   this.load.image('bullet1', 'images/bullet1.png')
+  this.load.image('bullet5', 'images/bullet5.png')
   this.load.spritesheet('mineral', 'images/mineral-sprite.png', { frameWidth: 16, frameHeight: 16 })
   this.load.spritesheet('asteroid', 'images/asteroid-sprite.png', { frameWidth: 64, frameHeight: 64 })
   this.load.image('base', 'images/base.png')
   this.load.image('fire1', 'images/fire1.png')
   this.load.image('rubble', 'images/rubble.png')
+  this.load.image('alien', 'images/alien.png')
 }
 
 function create(this: Phaser.Scene) {
   this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'background')
 
-  for (let b = 0; b < 2; b++) {
+  for (let b = 0; b < 5; b++) {
     bulletGroups.push(
       this.physics.add.group({
         classType: Bullet,
@@ -54,6 +58,12 @@ function create(this: Phaser.Scene) {
     classType: Base,
     maxSize: 4,
     runChildUpdate: false
+  })
+
+  aliens = this.physics.add.group({
+    classType: Alien,
+    maxSize: 2,
+    runChildUpdate: true
   })
 
   this.time.addEvent({
@@ -96,6 +106,9 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(bases, bulletGroups[1], undefined, baseHitByBullet)
   this.physics.add.collider(bases, asteroids, baseHitByRock)
   this.physics.add.collider(bases, minerals, baseCollectMineral)
+  this.physics.add.collider(aliens, asteroids, alienCrashIntoRock)
+  this.physics.add.collider(aliens, bulletGroups[0], undefined, alienHitByBullet)
+  this.physics.add.collider(aliens, bulletGroups[1], undefined, alienHitByBullet)
 }
 
 export const startGame = () => {
