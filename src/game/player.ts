@@ -16,7 +16,7 @@ function playerCollectMineral(
   const mineral = mineralObj as Mineral
   const player = playerObj as Player
 
-  player.scoreUpdate(mineral.value)
+  player.scoreUpdate(mineral.value, true)
 
   mineral.done()
 }
@@ -112,7 +112,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   scoreText: Phaser.GameObjects.Text
 
-  private score = 10000
+  private score = 0
 
   lastFired = 0
 
@@ -122,9 +122,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   diedTime: number
   dead = true
 
-  scoreUpdate(points: number) {
+  scoreUpdate(points: number, showFloatText?: boolean) {
     this.score += points
+    if (this.score < 0) {
+      this.score = 0
+    }
     this.scoreText.text = this.score.toString()
+
+    if (showFloatText) {
+      const pointText = this.scene.add.text(this.x, this.y, points.toString(), { color: '#7F7' })
+      const startTime = this.scene.time.now
+      const event = (time: number, delta: number) => {
+        if (time - startTime > 2000) {
+          pointText.destroy()
+          this.scene.events.off('update', event)
+        }
+      }
+      this.scene.events.on('update', event)
+    }
   }
 
   update(time: number, delta: number) {

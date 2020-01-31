@@ -16,19 +16,39 @@ const randomMineral = () => {
   }
 }
 
-const mineralValue = [100, 250, 500, 1000]
+const mineralValues: { value: number; particles?: number }[] = [
+  { value: 100 },
+  { value: 250 },
+  { value: 500, particles: 250 },
+  { value: 1000, particles: 100 }
+]
 
 export class Mineral extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0, 'mineral', randomMineral())
+    this.sparkleParticleManager = this.scene.add.particles('mineral', 0)
   }
+
+  sparkleParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
   value = 0
 
   spawn(x: number, y: number) {
     const mineralType = randomMineral()
-    this.value = mineralValue[mineralType]
+    this.value = mineralValues[mineralType].value
     this.setFrame(mineralType)
+
+    if (mineralType === 3 || mineralType === 2) {
+      this.sparkleParticleManager = this.scene.add.particles('mineral', mineralType)
+      const emitter = this.sparkleParticleManager.createEmitter({
+        speed: 100,
+        blendMode: 'ADD',
+        lifespan: 250,
+        frequency: mineralValues[mineralType].particles,
+        scale: { start: 0.5, end: 0 }
+      })
+      emitter.startFollow(this)
+    }
 
     this.setActive(true)
     this.setVisible(true)
@@ -57,6 +77,7 @@ export class Mineral extends Phaser.Physics.Arcade.Sprite {
     // this.setActive(false)
     // this.setVisible(false)
     // this.body.stop()
+    this.sparkleParticleManager.destroy()
     minerals.remove(this, true)
   }
 }
