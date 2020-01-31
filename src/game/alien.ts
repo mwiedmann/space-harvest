@@ -43,6 +43,14 @@ export class Alien extends Phaser.Physics.Arcade.Image {
   }
 
   fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
+  nextTurnTime = 0
+
+  turn() {
+    const newVelocity = this.scene.physics.velocityFromRotation(this.rotation, 100)
+    this.setVelocity(newVelocity.x, newVelocity.y)
+
+    this.nextTurnTime = this.scene.time.now + Phaser.Math.RND.integerInRange(2000, 10000)
+  }
 
   spawn() {
     this.setAngle(Phaser.Math.RND.integerInRange(0, 360))
@@ -50,15 +58,12 @@ export class Alien extends Phaser.Physics.Arcade.Image {
     const startingPosition = getStartingEdgePosition()
 
     this.setPosition(startingPosition.x, startingPosition.y)
+    this.body.reset(startingPosition.x, startingPosition.y)
     this.setActive(true)
     this.setVisible(true)
 
     this.setAngle(Phaser.Math.RND.integerInRange(0, 360))
-    // this.body.mass = 1
-    this.body.reset(startingPosition.x, startingPosition.y)
-
-    const newVelocity = this.scene.physics.velocityFromRotation(this.rotation, 100)
-    this.setVelocity(newVelocity.x, newVelocity.y)
+    this.turn()
 
     this.setAngularVelocity(Phaser.Math.RND.integerInRange(0, 400) - 200)
   }
@@ -67,6 +72,10 @@ export class Alien extends Phaser.Physics.Arcade.Image {
     if (outOfBounds(this.x, this.y)) {
       const { x: newX, y: newY } = edgeCollideSetPosition(this.x, this.y)
       this.setPosition(newX, newY)
+    }
+
+    if (time > this.nextTurnTime) {
+      this.turn()
     }
   }
 
