@@ -3,6 +3,7 @@ import { edgeCollideSetPosition, outOfBounds } from './wrappable'
 import { Player } from './player'
 import { bulletGroups } from './game-init'
 import { shipSettings } from './consts'
+import { Alien } from './alien'
 
 export class Bullet extends Phaser.Physics.Arcade.Image {
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string) {
@@ -35,6 +36,30 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
       scale: { start: 1, end: 0 },
       blendMode: 'ADD',
       lifespan: 150
+    })
+
+    emitter.startFollow(this)
+  }
+
+  fireAlien(alien: Alien) {
+    this.setActive(true)
+    this.setVisible(true)
+
+    this.setAngle(Phaser.Math.RND.integerInRange(0, 360))
+    this.setPosition(alien.x, alien.y)
+    this.body.reset(alien.x, alien.y)
+
+    const newVelocity = this.scene.physics.velocityFromRotation(this.rotation, shipSettings.bulletSpeed)
+    this.setVelocity(newVelocity.x, newVelocity.y)
+
+    this.lifespan = shipSettings.bulletLifetime
+
+    this.particleManager = this.scene.add.particles(`bullet${this.playerNumber}`)
+    var emitter = this.particleManager.createEmitter({
+      speed: 20,
+      scale: { start: 1, end: 0 },
+      blendMode: 'ADD',
+      lifespan: 70
     })
 
     emitter.startFollow(this)

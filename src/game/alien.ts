@@ -3,7 +3,7 @@ import { outOfBounds, edgeCollideSetPosition, getStartingEdgePosition } from './
 import { Asteroid } from './asteroid'
 import { Bullet } from './bullet'
 import { gameSettings } from './consts'
-import { aliens } from './game-init'
+import { aliens, bulletGroups } from './game-init'
 
 export const alienData = {
   nextAlienSpawn: 0
@@ -27,7 +27,7 @@ export function alienHitByBullet(
   const bullet = bulletObj as Bullet
   const alien = alienObj as Alien
 
-  if (bullet.playerNumber !== 5) {
+  if (bullet.playerNumber !== 4) {
     bullet.done()
     alien.done()
     return true
@@ -44,6 +44,7 @@ export class Alien extends Phaser.Physics.Arcade.Image {
 
   fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
   nextTurnTime = 0
+  nextShootTime = 0
 
   turn() {
     const newVelocity = this.scene.physics.velocityFromRotation(this.rotation, 100)
@@ -68,6 +69,16 @@ export class Alien extends Phaser.Physics.Arcade.Image {
     this.setAngularVelocity(Phaser.Math.RND.integerInRange(0, 400) - 200)
   }
 
+  shoot() {
+    var bullet = bulletGroups[4].get(undefined, undefined, '4') as Bullet
+
+    if (bullet) {
+      bullet.fireAlien(this)
+    }
+
+    this.nextShootTime = this.scene.time.now + Phaser.Math.RND.integerInRange(1000, 3000)
+  }
+
   update(time: number, delta: number) {
     if (outOfBounds(this.x, this.y)) {
       const { x: newX, y: newY } = edgeCollideSetPosition(this.x, this.y)
@@ -76,6 +87,10 @@ export class Alien extends Phaser.Physics.Arcade.Image {
 
     if (time > this.nextTurnTime) {
       this.turn()
+    }
+
+    if (time > this.nextShootTime) {
+      this.shoot()
     }
   }
 
