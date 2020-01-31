@@ -6,7 +6,7 @@ import { settingsHelpers, gameSettings } from './consts'
 import { Asteroid, shootRock } from './asteroid'
 import { players, playerCrashIntoRock, playerHitByBullet, playerCrashIntoBase } from './player'
 import { Base, baseHitByBullet, baseHitByRock, baseCollectMineral } from './base'
-import { alienCrashIntoRock, alienHitByBullet, Alien } from './alien'
+import { alienCrashIntoRock, alienHitByBullet, Alien, alienCollectMineral } from './alien'
 
 export let bulletGroups: Phaser.Physics.Arcade.Group[] = []
 export let minerals: Phaser.Physics.Arcade.Group
@@ -112,6 +112,7 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(aliens, asteroids, alienCrashIntoRock)
   this.physics.add.collider(aliens, bulletGroups[0], undefined, alienHitByBullet)
   this.physics.add.collider(aliens, bulletGroups[1], undefined, alienHitByBullet)
+  this.physics.add.collider(aliens, minerals, undefined, alienCollectMineral)
 }
 
 export const startGame = () => {

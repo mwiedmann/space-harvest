@@ -4,6 +4,7 @@ import { Asteroid } from './asteroid'
 import { Bullet } from './bullet'
 import { gameSettings } from './consts'
 import { aliens, bulletGroups } from './game-init'
+import { Mineral } from './mineral'
 
 export const alienData = {
   nextAlienSpawn: 0
@@ -32,6 +33,15 @@ export function alienHitByBullet(
     alien.done()
     return true
   }
+  return false
+}
+
+export function alienCollectMineral(
+  alienObj: Phaser.GameObjects.GameObject,
+  mineralObj: Phaser.GameObjects.GameObject
+): boolean {
+  const mineral = mineralObj as Mineral
+  mineral.done()
   return false
 }
 

@@ -13,8 +13,8 @@ export const shipSettings = {
 }
 
 export const gameSettings = {
-  screenWidth: 1800,
-  screenHeight: 900,
+  screenWidth: 1400,
+  screenHeight: 800,
   worldBoundEdgeSize: 32,
   deathScorePenalty: -1000,
   shootScorePenalty: -5,
