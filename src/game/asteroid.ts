@@ -53,7 +53,7 @@ export class Asteroid extends Phaser.Physics.Arcade.Sprite {
       y: this.y
     })
 
-    const nuggets = Math.ceil(Phaser.Math.RND.integerInRange(1, 5))
+    const nuggets = Math.ceil(Phaser.Math.RND.integerInRange(1, 3))
 
     for (let i = 0; i < nuggets; i++) {
       let mineral = minerals.get() as Mineral
