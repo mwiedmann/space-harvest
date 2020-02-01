@@ -4,6 +4,7 @@ import { Bullet } from './bullet'
 import { Asteroid } from './asteroid'
 import { Mineral } from './mineral'
 import { players } from './player'
+import { gameSettings } from './consts'
 
 export function baseHitByBullet(
   baseObj: Phaser.GameObjects.GameObject,
@@ -14,6 +15,7 @@ export function baseHitByBullet(
 
   if (bullet.playerNumber !== base.playerNumber) {
     bullet.done()
+    base.hitByBullet()
     return true
   }
   return false
@@ -21,7 +23,9 @@ export function baseHitByBullet(
 
 export function baseHitByRock(baseObj: Phaser.GameObjects.GameObject, rockObj: Phaser.GameObjects.GameObject): void {
   const rock = rockObj as Asteroid
+  const base = baseObj as Base
 
+  base.hitByAsteroid()
   rock.breakApart()
 }
 
@@ -48,6 +52,20 @@ export class Base extends Phaser.Physics.Arcade.Image {
     this.setActive(true)
     this.setVisible(true)
     this.body.reset(x, y)
+  }
+
+  hitByBullet() {
+    players.find(p => p.number === this.playerNumber)?.scoreUpdate(gameSettings.baseHitByBulletScorePenalty)
+
+    // TODO: Spawn a little explosion?
+  }
+
+  hitByAsteroid() {
+    players.find(p => p.number === this.playerNumber)?.scoreUpdate(gameSettings.baseHitByAsteroidScorePenalty)
+  }
+
+  hitByAlien() {
+    players.find(p => p.number === this.playerNumber)?.scoreUpdate(gameSettings.baseHitByAlienScorePenalty)
   }
 
   done() {

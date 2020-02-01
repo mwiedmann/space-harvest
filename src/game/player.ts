@@ -130,7 +130,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.scoreText.text = this.score.toString()
 
     if (showFloatText) {
-      const pointText = this.scene.add.text(this.x, this.y, points.toString(), { color: '#7F7' })
+      const pointText = this.scene.add.text(this.x, this.y, points.toString(), { color: points > 0 ? '#4F4' : '#F44' })
       const startTime = this.scene.time.now
       const event = (time: number, delta: number) => {
         if (time - startTime > 2000) {
@@ -189,7 +189,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   died() {
-    this.scoreUpdate(gameSettings.deathScorePenalty)
+    this.scoreUpdate(gameSettings.playerDeathScorePenalty, true)
     this.fireParticleManager.createEmitter({
       speed: 50,
       blendMode: 'ADD',
