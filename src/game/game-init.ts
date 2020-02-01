@@ -3,7 +3,7 @@ import { Bullet } from './bullet'
 import { update } from './update'
 import { Mineral } from './mineral'
 import { settingsHelpers, gameSettings } from './consts'
-import { Asteroid, shootRock } from './asteroid'
+import { Asteroid, asteroidHitByBullet } from './asteroid'
 import { players, playerCrashIntoRock, playerHitByBullet, playerCrashIntoBase } from './player'
 import { Base, baseHitByBullet, baseHitByRock, baseCollectMineral } from './base'
 import {
@@ -115,11 +115,11 @@ function create(this: Phaser.Scene) {
     }
   })
 
-  this.physics.add.collider(asteroids, bulletGroups[0], shootRock)
-  this.physics.add.collider(asteroids, bulletGroups[1], shootRock)
-  this.physics.add.collider(asteroids, bulletGroups[2], shootRock)
-  this.physics.add.collider(asteroids, bulletGroups[3], shootRock)
-  this.physics.add.collider(asteroids, bulletGroups[4], shootRock)
+  this.physics.add.collider(asteroids, bulletGroups[0], asteroidHitByBullet)
+  this.physics.add.collider(asteroids, bulletGroups[1], asteroidHitByBullet)
+  this.physics.add.collider(asteroids, bulletGroups[2], asteroidHitByBullet)
+  this.physics.add.collider(asteroids, bulletGroups[3], asteroidHitByBullet)
+  this.physics.add.collider(asteroids, bulletGroups[4], asteroidHitByBullet)
   this.physics.add.collider(players, asteroids, playerCrashIntoRock)
   this.physics.add.collider(players, bases, undefined, playerCrashIntoBase)
   this.physics.add.collider(players, bulletGroups[0], undefined, playerHitByBullet)

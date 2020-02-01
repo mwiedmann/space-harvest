@@ -4,12 +4,15 @@ import { Bullet } from './bullet'
 import { Mineral } from './mineral'
 import { edgeCollideSetPosition, outOfBounds, getStartingEdgePosition } from './wrappable'
 
-export function shootRock(rockObj: Phaser.GameObjects.GameObject, bulletObj: Phaser.GameObjects.GameObject): void {
+export function asteroidHitByBullet(
+  rockObj: Phaser.GameObjects.GameObject,
+  bulletObj: Phaser.GameObjects.GameObject
+): void {
   const rock = rockObj as Asteroid
   const bullet = bulletObj as Bullet
 
   bullet.done()
-  rock.breakApart()
+  rock.breakApart(true)
 }
 
 export class Asteroid extends Phaser.Physics.Arcade.Sprite {
@@ -41,7 +44,7 @@ export class Asteroid extends Phaser.Physics.Arcade.Sprite {
     this.setAngularVelocity(Phaser.Math.RND.integerInRange(0, 400) - 200)
   }
 
-  breakApart() {
+  breakApart(spawnMinerals = false) {
     this.rubbleParticleManager.createEmitter({
       speed: 50,
       blendMode: 'ADD',
@@ -53,13 +56,15 @@ export class Asteroid extends Phaser.Physics.Arcade.Sprite {
       y: this.y
     })
 
-    const nuggets = Math.ceil(Phaser.Math.RND.integerInRange(1, 3))
+    if (spawnMinerals) {
+      const nuggets = Math.ceil(Phaser.Math.RND.integerInRange(1, 3))
 
-    for (let i = 0; i < nuggets; i++) {
-      let mineral = minerals.get() as Mineral
+      for (let i = 0; i < nuggets; i++) {
+        let mineral = minerals.get() as Mineral
 
-      if (mineral) {
-        mineral.spawn(this.x, this.y)
+        if (mineral) {
+          mineral.spawn(this.x, this.y)
+        }
       }
     }
     this.done()
@@ -73,9 +78,6 @@ export class Asteroid extends Phaser.Physics.Arcade.Sprite {
   }
 
   done() {
-    // this.setActive(false)
-    // this.setVisible(false)
-    // this.body.stop()
     asteroids.remove(this, true)
   }
 }

@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser'
 import { shipSettings, settingsHelpers, gameSettings } from './consts'
-import { minerals, bases, fireParticleManager } from './game-init'
+import { minerals, bases } from './game-init'
 import { Mineral } from './mineral'
 import { Asteroid } from './asteroid'
 import { Base } from './base'
@@ -92,6 +92,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(false)
     this.body.stop()
 
+    this.fireParticleManager = scene.add.particles(`fire1`)
+
     // this.setCollideWorldBounds(true)
     // // Typing error? Doesn't work without this but says is readoly
     // const db: any = this.body
@@ -101,6 +103,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   base: Base | undefined
 
   spawnParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
+  fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
   scoreText!: Phaser.GameObjects.Text
 
@@ -135,7 +138,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.scoreText.text = this.score.toString()
 
     if (showFloatText) {
-      const pointText = this.scene.add.text(this.x, this.y, points.toString(), { color: points > 0 ? '#4F4' : '#F44' })
+      const pointText = this.scene.add.text(this.x, this.y, points.toString(), {
+        color: points > 0 ? '#4F4' : '#F44',
+        fontSize:
+          points < 0 ? '18px' : points <= 250 ? '14px' : points <= 500 ? '16px' : points <= 1000 ? '18px' : '20px',
+        fontStyle: 'bold',
+        fontFamily: 'Verdana'
+      })
       const startTime = this.scene.time.now
 
       // Get a closure on `scene` because if the player gets destroyed, this event still needs a ref to the scene
@@ -193,7 +202,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   thrustEffect() {
     const directionVector = this.scene.physics.velocityFromRotation(this.rotation, 12)
 
-    fireParticleManager.createEmitter({
+    this.fireParticleManager.createEmitter({
       blendMode: 'ADD',
       lifespan: 500,
       maxParticles: 1,
@@ -229,13 +238,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   /** Call when a player dies */
   died() {
-    this.deathEffects()
     this.scoreUpdate(gameSettings.playerDeathScorePenalty, true, true)
+    this.deathEffects()
   }
 
   /** Play the death explosion, reset the player, and update some death settings/timers */
   deathEffects() {
-    fireParticleManager.createEmitter({
+    this.fireParticleManager.createEmitter({
       speed: 50,
       blendMode: 'ADD',
       lifespan: 1000,

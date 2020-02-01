@@ -6,7 +6,7 @@ export const shipSettings = {
   maxVelocity: 200,
   drag: 130,
   fireRate: 250,
-  keyboardTurnRate: 1,
+  keyboardTurnRate: 0.8,
   deadTime: 5000,
   bulletSpeed: 500,
   bulletLifetime: 1000
