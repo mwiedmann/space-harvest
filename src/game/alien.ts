@@ -3,9 +3,10 @@ import { outOfBounds, edgeCollideSetPosition, getStartingEdgePosition } from './
 import { Asteroid } from './asteroid'
 import { Bullet } from './bullet'
 import { gameSettings } from './consts'
-import { aliens, bulletGroups } from './game-init'
+import { aliens, bulletGroups, minerals } from './game-init'
 import { Mineral } from './mineral'
 import { Base } from './base'
+import { Player } from './player'
 
 export type IAlienType = 'satellite' | 'probe'
 const alienSpawnTypes: IAlienType[] = ['satellite', 'probe']
@@ -58,6 +59,23 @@ export function alienCrashIntoBase(
   alien.done()
 }
 
+// TODO: Not sure why the params are reversed on this one.
+// Maybe because the players are in an array rather than a Group?
+export function alienCrashIntoPlayer(
+  playerObj: Phaser.GameObjects.GameObject,
+  alienObj: Phaser.GameObjects.GameObject
+): boolean {
+  const alien = alienObj as Alien
+  const player = playerObj as Player
+
+  player.died()
+  if (alientTypeSettings[alien.alienType].vulnerable) {
+    alien.done()
+    return true
+  }
+  return false
+}
+
 export function alienHitByBullet(
   alienObj: Phaser.GameObjects.GameObject,
   bulletObj: Phaser.GameObjects.GameObject
@@ -67,7 +85,7 @@ export function alienHitByBullet(
 
   if (bullet.playerNumber !== 4) {
     bullet.done()
-    alien.done()
+    alien.done(true)
     return true
   }
   return false
@@ -149,7 +167,7 @@ export class Alien extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  done() {
+  done(spawnMineral = false) {
     alienData.nextAlienSpawn =
       this.scene.time.now +
       Phaser.Math.RND.integerInRange(gameSettings.alienSpawnMinTime, gameSettings.alientSpawnMaxTime)
@@ -162,6 +180,14 @@ export class Alien extends Phaser.Physics.Arcade.Sprite {
       x: this.x,
       y: this.y
     })
+
+    if (spawnMineral) {
+      let mineral = minerals.get() as Mineral
+
+      if (mineral) {
+        mineral.spawn(this.x, this.y, 4)
+      }
+    }
 
     aliens.remove(this, true)
   }

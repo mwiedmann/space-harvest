@@ -1,11 +1,12 @@
 import * as Phaser from 'phaser'
 import { shipSettings, settingsHelpers, gameSettings } from './consts'
-import { minerals, bases } from './game-init'
+import { minerals, bases, fireParticleManager } from './game-init'
 import { Mineral } from './mineral'
 import { Asteroid } from './asteroid'
 import { Base } from './base'
 import { edgeCollideSetPosition, outOfBounds } from './wrappable'
 import { Bullet } from './bullet'
+import { updateState } from './update'
 
 export const players: Player[] = []
 
@@ -65,17 +66,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene, public name: string, public number: number) {
     super(scene, 0, 0, `ship${number}`)
 
-    const baseLocation = settingsHelpers.playerStartingLocations[number]
-    this.baseX = baseLocation.x
-    this.baseY = baseLocation.y
-    const base = bases.get() as Base
-    base.playerNumber = number
-    base.spawn(baseLocation.x, baseLocation.y)
+    this.createBase(number)
 
     scene.add.existing(this)
     scene.physics.add.existing(this)
 
-    this.setPosition(baseLocation.x, baseLocation.y)
+    this.setPosition(this.baseX, this.baseY)
     this.setAngularDrag(shipSettings.angularDrag)
     this.setDrag(shipSettings.drag)
     this.setMaxVelocity(shipSettings.maxVelocity, shipSettings.maxVelocity)
@@ -89,7 +85,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // Player starts "dead" and can't move/fire for a few moments
     this.diedTime = this.scene.time.now - (shipSettings.deadTime - 1000)
 
-    this.fireParticleManager = this.scene.add.particles(`fire1`)
     this.spawnParticleManager = this.scene.add.particles(`bullet${number}`)
 
     // Start not active. After a few moments the ship will spawn
@@ -97,32 +92,42 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(false)
     this.body.stop()
 
-    this.scoreText = scene.add.text(baseLocation.x - 32, baseLocation.y - 32, this.score.toString(), {
-      color: 'yellow'
-    })
-
     // this.setCollideWorldBounds(true)
     // // Typing error? Doesn't work without this but says is readoly
     // const db: any = this.body
     // db.onWorldBounds = true
   }
 
-  fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
+  base: Base | undefined
+
   spawnParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
-  scoreText: Phaser.GameObjects.Text
+  scoreText!: Phaser.GameObjects.Text
 
-  private score = 0
+  private score = gameSettings.playerStartingScore
 
   lastFired = 0
 
-  baseX: number
-  baseY: number
+  baseX: number = 0
+  baseY: number = 0
 
   diedTime: number
   dead = true
 
-  scoreUpdate(points: number, showFloatText?: boolean) {
+  createBase(playerNumber: number) {
+    const baseLocation = settingsHelpers.playerStartingLocations[playerNumber]
+    this.baseX = baseLocation.x
+    this.baseY = baseLocation.y
+    this.base = bases.get() as Base
+    this.base.playerNumber = playerNumber
+    this.base.spawn(baseLocation.x, baseLocation.y)
+
+    this.scoreText = this.scene.add.text(this.baseX - 32, this.baseY - 32, this.score.toString(), {
+      color: 'yellow'
+    })
+  }
+
+  scoreUpdate(points: number, showFloatText?: boolean, playerDied?: boolean) {
     this.score += points
     if (this.score < 0) {
       this.score = 0
@@ -132,14 +137,46 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (showFloatText) {
       const pointText = this.scene.add.text(this.x, this.y, points.toString(), { color: points > 0 ? '#4F4' : '#F44' })
       const startTime = this.scene.time.now
+
+      // Get a closure on `scene` because if the player gets destroyed, this event still needs a ref to the scene
+      // TODO: Is there a better way to do this besides an an update event?
+      const scene = this.scene
       const event = (time: number, delta: number) => {
         if (time - startTime > 2000) {
           pointText.destroy()
-          this.scene.events.off('update', event)
+          scene.events.off('update', event)
         }
       }
-      this.scene.events.on('update', event)
+      scene.events.on('update', event)
     }
+
+    // Destroy the player's base if they run out of energy
+    if (this.score === 0) {
+      this.destroyed(playerDied)
+    }
+  }
+
+  /**
+   * Call when a player is out of energy and its game over
+   * @param playerDied Did this happen during a player death? Need to know so we don't replay the death effects
+   */
+  destroyed(playerDied?: boolean) {
+    this.base?.done()
+    this.base = undefined
+    this.scoreText.destroy()
+    this.spawnParticleManager.destroy()
+
+    // If they haven't just died, then kill them
+    if (!playerDied) {
+      this.deathEffects()
+    }
+
+    // Make players wait for a few seconds to join after someone is destroyed.
+    // Keeps a player from instantly joining the game after they die.
+    updateState.nextJoinTime = this.scene.time.now + gameSettings.timeAfterPlayerDestroyedToRejoin
+
+    players.splice(players.indexOf(this), 1)
+    this.destroy()
   }
 
   update(time: number, delta: number) {
@@ -156,7 +193,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   thrustEffect() {
     const directionVector = this.scene.physics.velocityFromRotation(this.rotation, 12)
 
-    this.fireParticleManager.createEmitter({
+    fireParticleManager.createEmitter({
       blendMode: 'ADD',
       lifespan: 500,
       maxParticles: 1,
@@ -167,6 +204,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     })
   }
 
+  /** Play the respawn effects */
   respawnEffect() {
     this.spawnParticleManager.createEmitter({
       speed: 150,
@@ -179,6 +217,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     })
   }
 
+  /** Respawn a player at their base */
   respawn() {
     this.respawnEffect()
 
@@ -188,9 +227,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(true)
   }
 
+  /** Call when a player dies */
   died() {
-    this.scoreUpdate(gameSettings.playerDeathScorePenalty, true)
-    this.fireParticleManager.createEmitter({
+    this.deathEffects()
+    this.scoreUpdate(gameSettings.playerDeathScorePenalty, true, true)
+  }
+
+  /** Play the death explosion, reset the player, and update some death settings/timers */
+  deathEffects() {
+    fireParticleManager.createEmitter({
       speed: 50,
       blendMode: 'ADD',
       lifespan: 1000,

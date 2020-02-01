@@ -6,6 +6,10 @@ import { Alien, alienData } from './alien'
 
 const stickSensitivity = 0.3
 
+export const updateState = {
+  nextJoinTime: 0
+}
+
 export function update(this: Phaser.Scene, time: number, delta: number) {
   // Set the time for the 1st alien spawn
   if (!alienData.nextAlienSpawn) {
@@ -28,7 +32,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
   let newPlayer: Player
 
   // Spacebar will add player 0
-  if (cursors.space?.isDown && !players.some(p => p.number === 0)) {
+  if (cursors.space?.isDown && !players.some(p => p.number === 0) && time >= updateState.nextJoinTime) {
     newPlayer = new Player(this, `Player-0`, 0)
     players.push(newPlayer)
   }
@@ -36,7 +40,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
   // Check for gamepad players joining the game
   this.input.gamepad?.gamepads.forEach((gp, i) => {
     if (gp.buttons.some(b => b.pressed)) {
-      if (!players.some(p => p.number === i)) {
+      if (!players.some(p => p.number === i) && time >= updateState.nextJoinTime) {
         newPlayer = new Player(this, `Player-${i}`, i)
         players.push(newPlayer)
       }

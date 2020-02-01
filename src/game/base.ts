@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { bases } from './game-init'
+import { bases, fireParticleManager } from './game-init'
 import { Bullet } from './bullet'
 import { Asteroid } from './asteroid'
 import { Mineral } from './mineral'
@@ -37,7 +37,6 @@ export function baseCollectMineral(
   const base = baseObj as Base
 
   players.find(p => p.number === base.playerNumber)?.scoreUpdate(mineral.value)
-
   mineral.done()
 }
 
@@ -69,9 +68,15 @@ export class Base extends Phaser.Physics.Arcade.Image {
   }
 
   done() {
-    // this.setActive(false)
-    // this.setVisible(false)
-    // this.body.stop()
+    fireParticleManager.createEmitter({
+      speed: 75,
+      blendMode: 'ADD',
+      lifespan: 2000,
+      maxParticles: 100,
+      x: this.x,
+      y: this.y
+    })
+
     bases.remove(this, true)
   }
 }

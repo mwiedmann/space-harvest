@@ -6,13 +6,22 @@ import { settingsHelpers, gameSettings } from './consts'
 import { Asteroid, shootRock } from './asteroid'
 import { players, playerCrashIntoRock, playerHitByBullet, playerCrashIntoBase } from './player'
 import { Base, baseHitByBullet, baseHitByRock, baseCollectMineral } from './base'
-import { alienCrashIntoRock, alienHitByBullet, Alien, alienCollectMineral, alienCrashIntoBase } from './alien'
+import {
+  alienCrashIntoRock,
+  alienHitByBullet,
+  Alien,
+  alienCollectMineral,
+  alienCrashIntoBase,
+  alienCrashIntoPlayer
+} from './alien'
 
 export let bulletGroups: Phaser.Physics.Arcade.Group[] = []
 export let minerals: Phaser.Physics.Arcade.Group
 export let asteroids: Phaser.Physics.Arcade.Group
 export let aliens: Phaser.Physics.Arcade.Group
 export let bases: Phaser.Physics.Arcade.StaticGroup
+
+export let fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
 /** Load all the images we need and assign them names */
 function preload(this: Phaser.Scene) {
@@ -33,6 +42,9 @@ function preload(this: Phaser.Scene) {
 /** Create all the physics groups we need and setup colliders between the ones we want to interact. */
 function create(this: Phaser.Scene) {
   this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'background')
+
+  // Global explosion particle manager
+  fireParticleManager = this.add.particles(`fire1`)
 
   // We create 5 bullet groups.
   // 0-3 are for actual human players
@@ -129,6 +141,7 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(aliens, bulletGroups[3], undefined, alienHitByBullet)
   this.physics.add.collider(aliens, minerals, undefined, alienCollectMineral)
   this.physics.add.collider(aliens, bases, alienCrashIntoBase)
+  this.physics.add.collider(aliens, players, undefined, alienCrashIntoPlayer)
 }
 
 export const startGame = () => {
