@@ -8,23 +8,42 @@ import { Mineral } from './mineral'
 import { Base } from './base'
 import { Player } from './player'
 
-export type IAlienType = 'satellite' | 'probe'
-const alienSpawnTypes: IAlienType[] = ['satellite', 'probe']
+export type IAlienType = 'satellite' | 'probe' | 'eye'
+const alienSpawnTypes: IAlienType[] = ['satellite', 'probe', 'eye']
 
 const alientTypeSettings: {
-  [K in IAlienType]: { spriteNumber: number; velocity: number; vulnerable: boolean; shoots: boolean }
+  [K in IAlienType]: {
+    spriteNumber: number
+    velocity: number
+    vulnerable: boolean
+    shoots: boolean
+    shootTimeMin: number
+    shootTimeMax: number
+  }
 } = {
   satellite: {
     spriteNumber: 0,
     velocity: 100,
     vulnerable: true,
-    shoots: true
+    shoots: true,
+    shootTimeMin: 1000,
+    shootTimeMax: 3000
   },
   probe: {
     spriteNumber: 1,
     velocity: 150,
     vulnerable: false,
-    shoots: false
+    shoots: false,
+    shootTimeMin: 0,
+    shootTimeMax: 0
+  },
+  eye: {
+    spriteNumber: 2,
+    velocity: 80,
+    vulnerable: false,
+    shoots: true,
+    shootTimeMin: 250,
+    shootTimeMax: 1500
   }
 }
 
@@ -138,7 +157,7 @@ export class Alien extends Phaser.Physics.Arcade.Sprite {
     this.setAngle(Phaser.Math.RND.integerInRange(0, 360))
     this.turn()
 
-    this.setAngularVelocity(Phaser.Math.RND.integerInRange(0, 400) - 200)
+    this.setAngularVelocity(Phaser.Math.RND.integerInRange(100, 300) * Phaser.Math.RND.pick([1, -1]))
   }
 
   shoot() {
@@ -148,8 +167,14 @@ export class Alien extends Phaser.Physics.Arcade.Sprite {
       if (bullet) {
         bullet.fireAlien(this)
       }
+
+      this.nextShootTime =
+        this.scene.time.now +
+        Phaser.Math.RND.integerInRange(
+          alientTypeSettings[this.alienType].shootTimeMin,
+          alientTypeSettings[this.alienType].shootTimeMax
+        )
     }
-    this.nextShootTime = this.scene.time.now + Phaser.Math.RND.integerInRange(1000, 3000)
   }
 
   update(time: number, delta: number) {

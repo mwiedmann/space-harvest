@@ -86,7 +86,7 @@ function create(this: Phaser.Scene) {
   })
 
   this.time.addEvent({
-    delay: 2000,
+    delay: 4000,
     loop: true,
     callback: () => {
       if (minerals.countActive() === 25) {
