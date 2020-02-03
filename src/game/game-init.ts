@@ -163,6 +163,7 @@ export const startGame = () => {
     },
     input: {
       gamepad: true
-    }
+    },
+    parent: 'game'
   })
 }

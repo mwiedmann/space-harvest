@@ -50,6 +50,11 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
   players.forEach(player => {
     player.update(time, delta)
 
+    // Destroy the player's base if they run out of energy
+    if (player.score === 0) {
+      player.destroyed()
+    }
+
     // Don't control dead players
     if (player.dead) {
       return

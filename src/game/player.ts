@@ -107,7 +107,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   scoreText!: Phaser.GameObjects.Text
 
-  private score = gameSettings.playerStartingScore
+  score = gameSettings.playerStartingScore
 
   lastFired = 0
 
@@ -158,25 +158,20 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
       scene.events.on('update', event)
     }
-
-    // Destroy the player's base if they run out of energy
-    if (this.score === 0) {
-      this.destroyed(playerDied)
-    }
   }
 
   /**
    * Call when a player is out of energy and its game over
    * @param playerDied Did this happen during a player death? Need to know so we don't replay the death effects
    */
-  destroyed(playerDied?: boolean) {
+  destroyed() {
     this.base?.done()
     this.base = undefined
     this.scoreText.destroy()
     this.spawnParticleManager.destroy()
 
     // If they haven't just died, then kill them
-    if (!playerDied) {
+    if (!this.dead) {
       this.deathEffects()
     }
 
