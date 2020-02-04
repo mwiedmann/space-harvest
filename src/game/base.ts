@@ -54,17 +54,17 @@ export class Base extends Phaser.Physics.Arcade.Image {
   }
 
   hitByBullet() {
-    players.find(p => p.number === this.playerNumber)?.scoreUpdate(gameSettings.baseHitByBulletScorePenalty)
+    players.find(p => p.number === this.playerNumber)?.energyUpdate(gameSettings.baseHitByBulletEnergyPenalty)
 
     // TODO: Spawn a little explosion?
   }
 
   hitByAsteroid() {
-    players.find(p => p.number === this.playerNumber)?.scoreUpdate(gameSettings.baseHitByAsteroidScorePenalty)
+    players.find(p => p.number === this.playerNumber)?.energyUpdate(gameSettings.baseHitByAsteroidEnergyPenalty)
   }
 
   hitByAlien() {
-    players.find(p => p.number === this.playerNumber)?.scoreUpdate(gameSettings.baseHitByAlienScorePenalty)
+    players.find(p => p.number === this.playerNumber)?.energyUpdate(gameSettings.baseHitByAlienEnergyPenalty)
   }
 
   done() {

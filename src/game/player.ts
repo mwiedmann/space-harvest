@@ -106,8 +106,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
   scoreText!: Phaser.GameObjects.Text
+  shipsText!: Phaser.GameObjects.Text
+  energyRect!: Phaser.GameObjects.Rectangle
 
-  score = gameSettings.playerStartingScore
+  score = 0
+  energy = gameSettings.playerStartingEnergy
+  ships = gameSettings.playerStartingShips
+  pointsUntilNextBonus = 0
 
   lastFired = 0
 
@@ -128,13 +133,47 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.scoreText = this.scene.add.text(this.baseX - 32, this.baseY - 32, this.score.toString(), {
       color: 'yellow'
     })
+    this.shipsText = this.scene.add.text(this.baseX - 33, this.baseY + 20, '', {
+      color: 'yellow'
+    })
+    this.shipsUpate(0) // Just to update UI
+    this.energyRect = this.scene.add.rectangle(
+      this.baseX + 11,
+      this.baseY + 27,
+      gameSettings.energyBarWidth,
+      gameSettings.energyBarHeight,
+      0 // Doesn't let me change color later if I dont' specify something here
+    )
+    this.energyUpdate(0) // Just to update UI
+  }
+
+  giveBonus() {
+    // Bonus sets the base back to full energy
+    this.energy = gameSettings.playerStartingEnergy
+    this.energyUpdate(0) // Just to update the UI
+    this.shipsUpate(1)
+  }
+
+  shipsUpate(change: number) {
+    this.ships += change
+    this.shipsText.text = `${this.ships < 10 ? '0' : ''}${this.ships}`
+  }
+
+  energyUpdate(change: number) {
+    this.energy += change
+    this.energyRect.fillColor = this.energy <= 25 ? 0xff0000 : this.energy <= 50 ? 0xffd800 : 0x00ff00
+    this.energyRect.width = gameSettings.energyBarWidth * (this.energy / gameSettings.playerStartingEnergy)
   }
 
   scoreUpdate(points: number, showFloatText?: boolean, playerDied?: boolean) {
     this.score += points
-    if (this.score < 0) {
-      this.score = 0
+
+    this.pointsUntilNextBonus += points
+    if (this.pointsUntilNextBonus >= gameSettings.pointsForBonus) {
+      this.giveBonus()
+      this.pointsUntilNextBonus -= gameSettings.pointsForBonus
     }
+
     this.scoreText.text = this.score.toString()
 
     if (showFloatText) {
@@ -168,6 +207,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.base?.done()
     this.base = undefined
     this.scoreText.destroy()
+    this.shipsText.destroy()
+    this.energyRect.destroy()
     this.spawnParticleManager.destroy()
 
     // If they haven't just died, then kill them
@@ -233,7 +274,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   /** Call when a player dies */
   died() {
-    this.scoreUpdate(gameSettings.playerDeathScorePenalty, true, true)
+    this.shipsUpate(-1)
     this.deathEffects()
   }
 

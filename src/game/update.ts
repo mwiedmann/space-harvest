@@ -39,6 +39,11 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
 
   // Check for gamepad players joining the game
   this.input.gamepad?.gamepads.forEach((gp, i) => {
+    // Only allow 2 players for now.
+    // Need to figure out some real-estate issues with 3-4 players
+    if (i > 1) {
+      return
+    }
     if (gp.buttons.some(b => b.pressed)) {
       if (!players.some(p => p.number === i) && time >= updateState.nextJoinTime) {
         newPlayer = new Player(this, `Player-${i}`, i)
@@ -51,7 +56,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
     player.update(time, delta)
 
     // Destroy the player's base if they run out of energy
-    if (player.score === 0) {
+    if (player.energy <= 0 || player.ships <= 0) {
       player.destroyed()
     }
 
@@ -107,7 +112,6 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
       if (bullet) {
         bullet.fire(player)
 
-        player.scoreUpdate(gameSettings.shootScorePenalty)
         player.lastFired = this.time.now + shipSettings.fireRate
       }
     }

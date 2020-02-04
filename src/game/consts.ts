@@ -16,15 +16,18 @@ export const gameSettings = {
   screenWidth: 1400,
   screenHeight: 800,
   worldBoundEdgeSize: 32,
-  playerStartingScore: 10000,
-  playerDeathScorePenalty: -5000,
-  shootScorePenalty: -5,
+  playerStartingEnergy: 100,
+  playerStartingShips: 3,
+  shootEnergyPenalty: -5,
   alienSpawnMinTime: 5000,
   alientSpawnMaxTime: 15000,
-  baseHitByBulletScorePenalty: -25,
-  baseHitByAsteroidScorePenalty: -500,
-  baseHitByAlienScorePenalty: -2500,
-  timeAfterPlayerDestroyedToRejoin: 5000
+  baseHitByBulletEnergyPenalty: -1,
+  baseHitByAsteroidEnergyPenalty: -25,
+  baseHitByAlienEnergyPenalty: -50,
+  timeAfterPlayerDestroyedToRejoin: 8000,
+  pointsForBonus: 20000,
+  energyBarWidth: 45,
+  energyBarHeight: 9
 }
 
 export const settingsHelpers = {
@@ -33,8 +36,8 @@ export const settingsHelpers = {
   worldBoundWidth: gameSettings.screenWidth + 2 * gameSettings.worldBoundEdgeSize,
   worldBoundHeight: gameSettings.screenHeight + 2 * gameSettings.worldBoundEdgeSize,
   playerStartingLocations: [
-    { x: 400, y: 200 },
-    { x: gameSettings.screenWidth - 400, y: gameSettings.screenHeight - 200 },
+    { x: 400, y: 300 },
+    { x: gameSettings.screenWidth - 400, y: gameSettings.screenHeight - 300 },
     { x: 400, y: gameSettings.screenHeight - 200 },
     { x: gameSettings.screenWidth - 400, y: 200 }
   ]

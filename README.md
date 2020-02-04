@@ -1,8 +1,16 @@
 # Space Harvest
 
-Destroy asteroids and other players while harvesting valuable minerals.
+Destroy asteroids, aliens, and other players while harvesting valuable minerals to keep your base alive.
 
-This is a work in progress Javascript game using the Phaser 3 game engine.
+## Gameplay
+
+Destroy the asteroids to release minerals that you can then capture for energy by flying through them with your ship. Your base will also capture any minerals that float into it.
+
+Destroy aliens to release rare super powered minerals.
+
+Asteroids, aliens, and other players can destroy your ship and damage your base. If you run out of ships or your base runs out of energy, its game over.
+
+Every 20,000 points your base will recharge and create you another ship.
 
 ## Controls
 
@@ -13,14 +21,6 @@ On the 360 controller, the trigger buttons control trust and any other button sh
 On the keyboard, spacebar fires, and the cursor keys control thrust and shooting.
 
 To get in the game, click a button on any joystick or press spacebar to use the keyboard for player 1.
-
-## Gameplay
-
-Destroy the asteroids to release minerals that you can then capture for points by flying through them with your ship. Your base will also capture any minerals that float into it.
-
-Shooting drains your minerals (and your score), so shoot wisely.
-
-Dying also loses you points so stay safe out there!
 
 ## What's coming next?
 
