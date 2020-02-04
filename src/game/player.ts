@@ -210,6 +210,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.shipsText.destroy()
     this.energyRect.destroy()
     this.spawnParticleManager.destroy()
+    this.fireParticleManager.destroy()
 
     // If they haven't just died, then kill them
     if (!this.dead) {

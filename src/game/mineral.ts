@@ -40,7 +40,7 @@ export class Mineral extends Phaser.Physics.Arcade.Sprite {
     this.setFrame(mineralType)
 
     if (mineralValues[mineralType].particles) {
-      this.sparkleParticleManager = this.scene.add.particles('mineral', mineralType)
+      this.sparkleParticleManager.setFrame(mineralType)
       const emitter = this.sparkleParticleManager.createEmitter({
         speed: 100,
         blendMode: 'ADD',

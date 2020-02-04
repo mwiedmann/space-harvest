@@ -10,9 +10,10 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     super(scene, 0, 0, `bullet${texture}`)
 
     this.playerNumber = parseInt(texture)
+    this.particleManager = this.scene.add.particles(`bullet${this.playerNumber}`)
   }
 
-  particleManager: Phaser.GameObjects.Particles.ParticleEmitterManager | undefined
+  particleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
   lifespan = 0
   playerNumber: number
@@ -30,7 +31,6 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
 
     this.lifespan = shipSettings.bulletLifetime
 
-    this.particleManager = this.scene.add.particles(`bullet${this.playerNumber}`)
     var emitter = this.particleManager.createEmitter({
       speed: 30,
       scale: { start: 1, end: 0 },
@@ -53,6 +53,11 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     this.setVelocity(newVelocity.x, newVelocity.y)
 
     this.lifespan = shipSettings.bulletLifetime
+
+    // Destroy any old particle managers
+    if (this.particleManager) {
+      this.particleManager.destroy()
+    }
 
     this.particleManager = this.scene.add.particles(`bullet${this.playerNumber}`)
     var emitter = this.particleManager.createEmitter({
