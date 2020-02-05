@@ -11,7 +11,7 @@ import { Player } from './player'
 export type IAlienType = 'satellite' | 'probe' | 'eye'
 const alienSpawnTypes: IAlienType[] = ['satellite', 'probe', 'eye']
 
-const alientTypeSettings: {
+const alienTypeSettings: {
   [K in IAlienType]: {
     spriteNumber: number
     velocity: number
@@ -64,7 +64,7 @@ export function alienCrashIntoRock(
 
   rock.breakApart()
 
-  if (alientTypeSettings[alien.alienType].vulnerable) {
+  if (alienTypeSettings[alien.alienType].vulnerable) {
     alien.done()
     return true
   }
@@ -92,7 +92,7 @@ export function alienCrashIntoPlayer(
   const player = playerObj as Player
 
   player.died()
-  if (alientTypeSettings[alien.alienType].vulnerable) {
+  if (alienTypeSettings[alien.alienType].vulnerable) {
     alien.done()
     return true
   }
@@ -138,7 +138,7 @@ export class Alien extends Phaser.Physics.Arcade.Sprite {
   turn() {
     const newVelocity = this.scene.physics.velocityFromRotation(
       this.rotation,
-      alientTypeSettings[this.alienType].velocity
+      alienTypeSettings[this.alienType].velocity
     )
     this.setVelocity(newVelocity.x, newVelocity.y)
 
@@ -147,7 +147,7 @@ export class Alien extends Phaser.Physics.Arcade.Sprite {
 
   spawn() {
     this.alienType = Phaser.Math.RND.pick(alienSpawnTypes)
-    this.setFrame(alientTypeSettings[this.alienType].spriteNumber)
+    this.setFrame(alienTypeSettings[this.alienType].spriteNumber)
 
     this.setAngle(Phaser.Math.RND.integerInRange(0, 360))
 
@@ -165,18 +165,18 @@ export class Alien extends Phaser.Physics.Arcade.Sprite {
   }
 
   shoot() {
-    if (alientTypeSettings[this.alienType].shoots) {
+    if (alienTypeSettings[this.alienType].shoots) {
       var bullet = bulletGroups[4].get(undefined, undefined, '4') as Bullet
 
       if (bullet) {
-        bullet.fireAlien(this, alientTypeSettings[this.alienType].targetPlayerChance)
+        bullet.fireAlien(this, alienTypeSettings[this.alienType].targetPlayerChance)
       }
 
       this.nextShootTime =
         this.scene.time.now +
         Phaser.Math.RND.integerInRange(
-          alientTypeSettings[this.alienType].shootTimeMin,
-          alientTypeSettings[this.alienType].shootTimeMax
+          alienTypeSettings[this.alienType].shootTimeMin,
+          alienTypeSettings[this.alienType].shootTimeMax
         )
     }
   }
