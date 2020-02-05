@@ -1,4 +1,4 @@
-import { bulletGroups, aliens } from './game-init'
+import { bulletGroups, aliens, controls } from './game-init'
 import { shipSettings, gameSettings } from './consts'
 import { players, Player } from './player'
 import { Bullet } from './bullet'
@@ -28,7 +28,9 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
     }
   }
 
-  const cursors = this.input.keyboard.createCursorKeys()
+  // Grab the global cursor controls
+  const cursors = controls.cursors!
+
   let newPlayer: Player
 
   // Spacebar will add player 0
@@ -52,6 +54,15 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
     }
   })
 
+  const key2 = controls.key2!
+
+  // Add AI player
+  if (key2?.isDown && !players.some(p => p.number === 1)) {
+    newPlayer = new Player(this, `Player-${1}`, 1)
+    newPlayer.isAI = true
+    players.push(newPlayer)
+  }
+
   players.forEach(player => {
     player.update(time, delta)
 
@@ -63,6 +74,19 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
     // Don't control dead players
     if (player.dead) {
       return
+    }
+
+    // Beginning of some basic AI.
+    // He just flies in a circle for now.
+    if (player.isAI) {
+      player.setAngularVelocity(-shipSettings.angularVelocity)
+
+      const unitVelocity = this.physics.velocityFromRotation(player.rotation, 0.5)
+      player.setVelocity(
+        player.body.velocity.x + unitVelocity.x * shipSettings.acceleration,
+        player.body.velocity.y + unitVelocity.y * shipSettings.acceleration
+      )
+      player.thrustEffect()
     }
 
     const horizStick = this.input.gamepad?.gamepads[player.number]?.leftStick.x

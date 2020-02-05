@@ -121,6 +121,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   diedTime: number
   dead = true
+  isAI = false
 
   createBase(playerNumber: number) {
     const baseLocation = settingsHelpers.playerStartingLocations[playerNumber]

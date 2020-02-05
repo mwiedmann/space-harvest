@@ -23,6 +23,12 @@ export let bases: Phaser.Physics.Arcade.StaticGroup
 
 export let fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
+export const controls: {
+  cursors?: Phaser.Types.Input.Keyboard.CursorKeys
+  key1?: Phaser.Input.Keyboard.Key
+  key2?: Phaser.Input.Keyboard.Key
+} = {}
+
 /** Load all the images we need and assign them names */
 function preload(this: Phaser.Scene) {
   this.load.image('background', 'images/background.jpg')
@@ -41,6 +47,11 @@ function preload(this: Phaser.Scene) {
 
 /** Create all the physics groups we need and setup colliders between the ones we want to interact. */
 function create(this: Phaser.Scene) {
+  // Create some keyboard controls
+  controls.cursors = this.input.keyboard.createCursorKeys()
+  controls.key1 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE)
+  controls.key2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO)
+
   this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'background')
 
   // Global explosion particle manager
