@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser'
 import { edgeCollideSetPosition, outOfBounds } from './wrappable'
-import { Player } from './player'
+import { Player, players } from './player'
 import { bulletGroups } from './game-init'
 import { shipSettings } from './consts'
 import { Alien } from './alien'
@@ -41,7 +41,7 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     emitter.startFollow(this)
   }
 
-  fireAlien(alien: Alien) {
+  fireAlien(alien: Alien, targetPlayerChance: number) {
     this.setActive(true)
     this.setVisible(true)
 
@@ -49,9 +49,27 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     this.setPosition(alien.x, alien.y)
     this.body.reset(alien.x, alien.y)
 
-    const newVelocity = this.scene.physics.velocityFromRotation(this.rotation, shipSettings.bulletSpeed)
-    this.setVelocity(newVelocity.x, newVelocity.y)
+    let newVelocity: Phaser.Math.Vector2 | undefined = undefined
 
+    if (Phaser.Math.RND.integerInRange(0, 100) <= targetPlayerChance) {
+      // Target a player
+      if (players.length > 0) {
+        const player = Phaser.Math.RND.pick(players)
+        newVelocity = this.scene.physics.velocityFromAngle(
+          Phaser.Math.RadToDeg(
+            Phaser.Math.Angle.Reverse(Phaser.Math.Angle.Between(player.x, player.y, alien.x, alien.y))
+          ),
+          shipSettings.bulletSpeed
+        )
+      }
+    }
+
+    // If no target, fire randomly
+    if (!newVelocity) {
+      newVelocity = this.scene.physics.velocityFromRotation(this.rotation, shipSettings.bulletSpeed)
+    }
+
+    this.setVelocity(newVelocity.x, newVelocity.y)
     this.lifespan = shipSettings.bulletLifetime
 
     // Destroy any old particle managers

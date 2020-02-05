@@ -19,6 +19,7 @@ const alientTypeSettings: {
     shoots: boolean
     shootTimeMin: number
     shootTimeMax: number
+    targetPlayerChance: number
   }
 } = {
   satellite: {
@@ -27,7 +28,8 @@ const alientTypeSettings: {
     vulnerable: true,
     shoots: true,
     shootTimeMin: 1000,
-    shootTimeMax: 3000
+    shootTimeMax: 3000,
+    targetPlayerChance: 20
   },
   probe: {
     spriteNumber: 1,
@@ -35,7 +37,8 @@ const alientTypeSettings: {
     vulnerable: false,
     shoots: false,
     shootTimeMin: 0,
-    shootTimeMax: 0
+    shootTimeMax: 0,
+    targetPlayerChance: 0
   },
   eye: {
     spriteNumber: 2,
@@ -43,7 +46,8 @@ const alientTypeSettings: {
     vulnerable: false,
     shoots: true,
     shootTimeMin: 250,
-    shootTimeMax: 1500
+    shootTimeMax: 1500,
+    targetPlayerChance: 25
   }
 }
 
@@ -165,7 +169,7 @@ export class Alien extends Phaser.Physics.Arcade.Sprite {
       var bullet = bulletGroups[4].get(undefined, undefined, '4') as Bullet
 
       if (bullet) {
-        bullet.fireAlien(this)
+        bullet.fireAlien(this, alientTypeSettings[this.alienType].targetPlayerChance)
       }
 
       this.nextShootTime =
