@@ -279,7 +279,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (otherPlayer && Phaser.Math.Distance.Between(this.x, this.y, otherPlayer.baseX, otherPlayer.baseY) < 250) {
       const angleToBase = Phaser.Math.Angle.Between(this.x, this.y, otherPlayer.baseX, otherPlayer.baseY)
       angle = Phaser.Math.Angle.Reverse(angleToBase)
-      turnAmount = 0.05
+      turnAmount = 0.04
     } else {
       // As the AI nears its target, we allow it to turn a bit more or it may fly by
       turnAmount = Phaser.Math.Distance.Between(this.x, this.y, target.x, target.y) < 200 ? 0.04 : 0.02
