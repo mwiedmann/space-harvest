@@ -21,7 +21,7 @@ export let asteroids: Phaser.Physics.Arcade.Group
 export let aliens: Phaser.Physics.Arcade.Group
 export let bases: Phaser.Physics.Arcade.StaticGroup
 
-export let fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
+export let globalFireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
 export const controls: {
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys
@@ -55,7 +55,7 @@ function create(this: Phaser.Scene) {
   this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'background')
 
   // Global explosion particle manager
-  fireParticleManager = this.add.particles(`fire1`)
+  globalFireParticleManager = this.add.particles(`fire1`)
 
   // We create 5 bullet groups.
   // 0-3 are for actual human players

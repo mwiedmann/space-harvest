@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser'
 import { shipSettings, settingsHelpers, gameSettings } from './consts'
-import { minerals, bases } from './game-init'
+import { minerals, bases, asteroids, aliens, globalFireParticleManager } from './game-init'
 import { Mineral } from './mineral'
 import { Asteroid } from './asteroid'
 import { Base } from './base'
@@ -42,6 +42,7 @@ export function playerCrashIntoBase(
 
   if (base.playerNumber !== player.number) {
     player.died()
+    base.hitByPlayer()
     return true
   }
   return false
@@ -237,6 +238,58 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  objectCloseEnoughForAI(obj: Phaser.GameObjects.GameObject) {
+    const sprite = obj as Phaser.GameObjects.Sprite
+
+    return (
+      (this.number === 0 && sprite.x <= gameSettings.screenWidth / 2) ||
+      (this.number === 1 && sprite.x >= gameSettings.screenWidth / 2)
+    )
+  }
+
+  aiMove(time: number, delta: number) {
+    const allTargets = [
+      ...aliens.children.getArray().filter(a => a.active),
+      ...asteroids.children.getArray().filter(a => a.active),
+      ...minerals.children.getArray().filter(a => a.active)
+    ]
+
+    let target: Phaser.GameObjects.Sprite | Phaser.GameObjects.Image
+
+    if (allTargets.length) {
+      target = allTargets.sort((a, b) => {
+        const aObj = a as Phaser.GameObjects.Sprite
+        const bObj = b as Phaser.GameObjects.Sprite
+        const aDist = Phaser.Math.Distance.Between(this.x, this.y, aObj.x, aObj.y)
+        const bDist = Phaser.Math.Distance.Between(this.x, this.y, bObj.x, bObj.y)
+
+        return aDist - bDist
+      })[0] as Phaser.GameObjects.Sprite
+    } else {
+      // No targets, just fly back to base
+      target = this.base!
+    }
+
+    // As the AI nears its target, we allow it to turn a bit more or it may fly by
+    const turnAmount = Phaser.Math.Distance.Between(this.x, this.y, target.x, target.y) < 200 ? 0.04 : 0.02
+
+    const angle = Phaser.Math.Angle.Between(this.x, this.y, target.x, target.y)
+    const newAngle = Phaser.Math.Angle.RotateTo(Phaser.Math.DegToRad(this.angle), angle, turnAmount)
+
+    this.setAngle(Phaser.Math.RadToDeg(newAngle))
+
+    // Normal speed for AI is a little slower or they are too chaotic.
+    const speedRatio = 0.25
+
+    // Slow the AI down a tad, not full throttle
+    const unitVelocity = this.scene.physics.velocityFromRotation(this.rotation, speedRatio)
+    this.setVelocity(
+      this.body.velocity.x + unitVelocity.x * shipSettings.acceleration,
+      this.body.velocity.y + unitVelocity.y * shipSettings.acceleration
+    )
+    this.thrustEffect()
+  }
+
   thrustEffect() {
     const directionVector = this.scene.physics.velocityFromRotation(this.rotation, 12)
 
@@ -282,7 +335,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   /** Play the death explosion, reset the player, and update some death settings/timers */
   deathEffects() {
-    this.fireParticleManager.createEmitter({
+    globalFireParticleManager.createEmitter({
       speed: 50,
       blendMode: 'ADD',
       lifespan: 1000,

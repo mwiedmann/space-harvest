@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { bases, fireParticleManager } from './game-init'
+import { bases, globalFireParticleManager } from './game-init'
 import { Bullet } from './bullet'
 import { Asteroid } from './asteroid'
 import { Mineral } from './mineral'
@@ -67,8 +67,12 @@ export class Base extends Phaser.Physics.Arcade.Image {
     players.find(p => p.number === this.playerNumber)?.energyUpdate(gameSettings.baseHitByAlienEnergyPenalty)
   }
 
+  hitByPlayer() {
+    players.find(p => p.number === this.playerNumber)?.energyUpdate(gameSettings.baseHitByPlayerEnergyPenalty)
+  }
+
   done() {
-    fireParticleManager.createEmitter({
+    globalFireParticleManager.createEmitter({
       speed: 75,
       blendMode: 'ADD',
       lifespan: 2000,

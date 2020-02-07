@@ -10,6 +10,9 @@ export const updateState = {
   nextJoinTime: 0
 }
 
+let ai0On = false
+let ai1On = false
+
 export function update(this: Phaser.Scene, time: number, delta: number) {
   // Set the time for the 1st alien spawn
   if (!alienData.nextAlienSpawn) {
@@ -55,12 +58,21 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
   })
 
   const key2 = controls.key2!
+  const key1 = controls.key1!
 
-  // Add AI player
-  if (key2?.isDown && !players.some(p => p.number === 1)) {
+  // Add AI players
+  if (time >= updateState.nextJoinTime && (key1?.isDown || ai0On) && !players.some(p => p.number === 0)) {
+    newPlayer = new Player(this, `Player-${0}`, 0)
+    newPlayer.isAI = true
+    players.push(newPlayer)
+    ai0On = true
+  }
+
+  if (time >= updateState.nextJoinTime && (key2?.isDown || ai1On) && !players.some(p => p.number === 1)) {
     newPlayer = new Player(this, `Player-${1}`, 1)
     newPlayer.isAI = true
     players.push(newPlayer)
+    ai1On = true
   }
 
   players.forEach(player => {
@@ -79,14 +91,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
     // Beginning of some basic AI.
     // He just flies in a circle for now.
     if (player.isAI) {
-      player.setAngularVelocity(-shipSettings.angularVelocity)
-
-      const unitVelocity = this.physics.velocityFromRotation(player.rotation, 0.5)
-      player.setVelocity(
-        player.body.velocity.x + unitVelocity.x * shipSettings.acceleration,
-        player.body.velocity.y + unitVelocity.y * shipSettings.acceleration
-      )
-      player.thrustEffect()
+      player.aiMove(time, delta)
     }
 
     const horizStick = this.input.gamepad?.gamepads[player.number]?.leftStick.x
@@ -126,9 +131,9 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
       player.thrustEffect()
     }
 
-    const fireButtonPressed = this.input.gamepad?.gamepads[player.number]?.buttons.some(
-      b => b.pressed && b.index !== 6 && b.index !== 7
-    )
+    const fireButtonPressed =
+      this.input.gamepad?.gamepads[player.number]?.buttons.some(b => b.pressed && b.index !== 6 && b.index !== 7) ||
+      player.isAI // TODO: Need to move the fire timer and AI check out of here
 
     if (((player.number === 0 && cursors.space?.isDown) || fireButtonPressed) && this.time.now > player.lastFired) {
       var bullet = bulletGroups[player.number].get(undefined, undefined, player.number.toString()) as Bullet
