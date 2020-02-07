@@ -270,12 +270,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       target = this.base!
     }
 
-    // As the AI nears its target, we allow it to turn a bit more or it may fly by
-    const turnAmount = Phaser.Math.Distance.Between(this.x, this.y, target.x, target.y) < 200 ? 0.04 : 0.02
+    let turnAmount: number
+    let angle: number
 
-    const angle = Phaser.Math.Angle.Between(this.x, this.y, target.x, target.y)
+    // If AI is nearing another base, turn around and don't crash into it
+    // This overrides any target
+    const otherPlayer = players.find(p => p.number === (this.number === 0 ? 1 : 0))
+    if (otherPlayer && Phaser.Math.Distance.Between(this.x, this.y, otherPlayer.baseX, otherPlayer.baseY) < 250) {
+      const angleToBase = Phaser.Math.Angle.Between(this.x, this.y, otherPlayer.baseX, otherPlayer.baseY)
+      angle = Phaser.Math.Angle.Reverse(angleToBase)
+      turnAmount = 0.05
+    } else {
+      // As the AI nears its target, we allow it to turn a bit more or it may fly by
+      turnAmount = Phaser.Math.Distance.Between(this.x, this.y, target.x, target.y) < 200 ? 0.04 : 0.02
+
+      angle = Phaser.Math.Angle.Between(this.x, this.y, target.x, target.y)
+    }
+
     const newAngle = Phaser.Math.Angle.RotateTo(Phaser.Math.DegToRad(this.angle), angle, turnAmount)
-
     this.setAngle(Phaser.Math.RadToDeg(newAngle))
 
     // Normal speed for AI is a little slower or they are too chaotic.
