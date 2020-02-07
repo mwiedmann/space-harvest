@@ -22,11 +22,11 @@ On the keyboard, spacebar fires, and the cursor keys control thrust and shooting
 
 To get in the game, click a button on any joystick or press spacebar to use the keyboard for player 1.
 
+## AI Players
+
+Press '1' or '2' to add in an AI player as player 1 or 2. Add them both in and watch them go at it for fun.
+
 ## What's coming next?
-
-More varied asteroids and minerals. Rare minerals will be worth extra points.
-
-Alien ships will periodically invade to cause chaos. Avoid their blasts and destroy them to release ultra-valuable minerals.
 
 Upgrades - Use some of your collected minerals to upgrade your ship and base. More firepower, bigger collection range, etc.
 
