@@ -163,6 +163,10 @@ export const startGame = () => {
     type: Phaser.AUTO,
     width: gameSettings.screenWidth,
     height: gameSettings.screenHeight,
+    scale: {
+      mode: Phaser.Scale.ScaleModes.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH
+    },
     physics: {
       default: 'arcade',
       arcade: {
@@ -178,6 +182,6 @@ export const startGame = () => {
     input: {
       gamepad: true
     },
-    parent: 'game'
+    parent: 'root'
   })
 }
