@@ -22,6 +22,7 @@ export let aliens: Phaser.Physics.Arcade.Group
 export let bases: Phaser.Physics.Arcade.StaticGroup
 
 export let globalFireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
+export let globalRubbleParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
 export const controls: {
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys
@@ -54,8 +55,10 @@ function create(this: Phaser.Scene) {
 
   this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'background')
 
-  // Global explosion particle manager
+  // Global particle managers
+  // Need these for particles that will exist after something is destroyed
   globalFireParticleManager = this.add.particles(`fire1`)
+  globalRubbleParticleManager = this.add.particles(`rubble`)
 
   // We create 5 bullet groups.
   // 0-3 are for actual human players
@@ -97,7 +100,7 @@ function create(this: Phaser.Scene) {
   })
 
   this.time.addEvent({
-    delay: 4000,
+    delay: gameSettings.asteroidSpawnTime,
     loop: true,
     callback: () => {
       if (minerals.countActive() === 25) {

@@ -1,8 +1,9 @@
 import * as Phaser from 'phaser'
-import { minerals, asteroids } from './game-init'
+import { minerals, asteroids, globalRubbleParticleManager } from './game-init'
 import { Bullet } from './bullet'
 import { Mineral } from './mineral'
 import { edgeCollideSetPosition, outOfBounds, getStartingEdgePosition } from './wrappable'
+import { gameSettings } from './consts'
 
 export function asteroidHitByBullet(
   rockObj: Phaser.GameObjects.GameObject,
@@ -18,11 +19,7 @@ export function asteroidHitByBullet(
 export class Asteroid extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0, 'asteroid', Phaser.Math.RND.integerInRange(0, 3))
-
-    this.rubbleParticleManager = this.scene.add.particles(`rubble`)
   }
-
-  rubbleParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 
   spawn() {
     this.setActive(true)
@@ -45,7 +42,7 @@ export class Asteroid extends Phaser.Physics.Arcade.Sprite {
   }
 
   breakApart(spawnMinerals = false) {
-    this.rubbleParticleManager.createEmitter({
+    globalRubbleParticleManager.createEmitter({
       speed: 50,
       blendMode: 'ADD',
       lifespan: 700,
@@ -57,7 +54,9 @@ export class Asteroid extends Phaser.Physics.Arcade.Sprite {
     })
 
     if (spawnMinerals) {
-      const nuggets = Math.ceil(Phaser.Math.RND.integerInRange(1, 3))
+      const nuggets = Math.ceil(
+        Phaser.Math.RND.integerInRange(gameSettings.mineralSpawnMin, gameSettings.mineralSpawnMax)
+      )
 
       for (let i = 0; i < nuggets; i++) {
         let mineral = minerals.get() as Mineral

@@ -28,7 +28,10 @@ export const gameSettings = {
   timeAfterPlayerDestroyedToRejoin: 8000,
   pointsForBonus: 20000,
   energyBarWidth: 45,
-  energyBarHeight: 9
+  energyBarHeight: 9,
+  asteroidSpawnTime: 4000,
+  mineralSpawnMin: 1,
+  mineralSpawnMax: 3
 }
 
 export const settingsHelpers = {

@@ -3,7 +3,7 @@ import { outOfBounds, edgeCollideSetPosition, getStartingEdgePosition } from './
 import { Asteroid } from './asteroid'
 import { Bullet } from './bullet'
 import { gameSettings } from './consts'
-import { aliens, bulletGroups, minerals } from './game-init'
+import { aliens, bulletGroups, minerals, globalFireParticleManager } from './game-init'
 import { Mineral } from './mineral'
 import { Base } from './base'
 import { Player } from './player'
@@ -126,11 +126,8 @@ export function alienCollectMineral(
 export class Alien extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene) {
     super(scene, 0, 0, 'alien', 0)
-
-    this.fireParticleManager = this.scene.add.particles(`fire1`)
   }
 
-  fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
   nextTurnTime = 0
   nextShootTime = 0
   alienType: IAlienType = 'satellite'
@@ -201,7 +198,7 @@ export class Alien extends Phaser.Physics.Arcade.Sprite {
       this.scene.time.now +
       Phaser.Math.RND.integerInRange(gameSettings.alienSpawnMinTime, gameSettings.alientSpawnMaxTime)
 
-    this.fireParticleManager.createEmitter({
+    globalFireParticleManager.createEmitter({
       speed: 50,
       blendMode: 'ADD',
       lifespan: 1000,
