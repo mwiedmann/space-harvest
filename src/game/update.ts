@@ -1,8 +1,9 @@
-import { bulletGroups, aliens, controls } from './game-init'
+import { bulletGroups, aliens, controls, minerals, asteroids, titleScreen } from './game-init'
 import { shipSettings, gameSettings } from './consts'
 import { players, Player } from './player'
 import { Bullet } from './bullet'
 import { Alien, alienData } from './alien'
+import { Asteroid } from './asteroid'
 
 const stickSensitivity = 0.3
 
@@ -12,8 +13,83 @@ export const updateState = {
 
 let ai0On = false
 let ai1On = false
+let gameStarted = false
+
+const startGame = (scene: Phaser.Scene) => {
+  scene.time.addEvent({
+    delay: gameSettings.asteroidSpawnTime,
+    loop: true,
+    callback: () => {
+      if (minerals.countActive() === 25) {
+        return
+      }
+
+      let rock = asteroids.get() as Asteroid
+
+      if (rock) {
+        rock.spawn()
+      }
+    }
+  })
+
+  titleScreen.destroy()
+
+  gameStarted = true
+}
 
 export function update(this: Phaser.Scene, time: number, delta: number) {
+  // Grab the global cursor controls
+  const cursors = controls.cursors!
+
+  let newPlayer: Player
+
+  // Spacebar will add player 0
+  if (cursors.space?.isDown && !players.some(p => p.number === 0) && time >= updateState.nextJoinTime) {
+    newPlayer = new Player(this, `Player-0`, 0)
+    players.push(newPlayer)
+    startGame(this)
+  }
+
+  // Check for gamepad players joining the game
+  this.input.gamepad?.gamepads.forEach((gp, i) => {
+    // Only allow 2 players for now.
+    // Need to figure out some real-estate issues with 3-4 players
+    if (i > 1) {
+      return
+    }
+    if (gp.buttons.some(b => b.pressed)) {
+      if (!players.some(p => p.number === i) && time >= updateState.nextJoinTime) {
+        newPlayer = new Player(this, `Player-${i}`, i)
+        players.push(newPlayer)
+        startGame(this)
+      }
+    }
+  })
+
+  const key2 = controls.key2!
+  const key1 = controls.key1!
+
+  // Add AI players
+  if (time >= updateState.nextJoinTime && (key1?.isDown || ai0On) && !players.some(p => p.number === 0)) {
+    newPlayer = new Player(this, `Player-${0}`, 0)
+    newPlayer.isAI = true
+    players.push(newPlayer)
+    ai0On = true
+    startGame(this)
+  }
+
+  if (time >= updateState.nextJoinTime && (key2?.isDown || ai1On) && !players.some(p => p.number === 1)) {
+    newPlayer = new Player(this, `Player-${1}`, 1)
+    newPlayer.isAI = true
+    players.push(newPlayer)
+    ai1On = true
+    startGame(this)
+  }
+
+  if (!gameStarted) {
+    return
+  }
+
   // Set the time for the 1st alien spawn
   if (!alienData.nextAlienSpawn) {
     alienData.nextAlienSpawn =
@@ -29,50 +105,6 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
     if (alien) {
       alien.spawn()
     }
-  }
-
-  // Grab the global cursor controls
-  const cursors = controls.cursors!
-
-  let newPlayer: Player
-
-  // Spacebar will add player 0
-  if (cursors.space?.isDown && !players.some(p => p.number === 0) && time >= updateState.nextJoinTime) {
-    newPlayer = new Player(this, `Player-0`, 0)
-    players.push(newPlayer)
-  }
-
-  // Check for gamepad players joining the game
-  this.input.gamepad?.gamepads.forEach((gp, i) => {
-    // Only allow 2 players for now.
-    // Need to figure out some real-estate issues with 3-4 players
-    if (i > 1) {
-      return
-    }
-    if (gp.buttons.some(b => b.pressed)) {
-      if (!players.some(p => p.number === i) && time >= updateState.nextJoinTime) {
-        newPlayer = new Player(this, `Player-${i}`, i)
-        players.push(newPlayer)
-      }
-    }
-  })
-
-  const key2 = controls.key2!
-  const key1 = controls.key1!
-
-  // Add AI players
-  if (time >= updateState.nextJoinTime && (key1?.isDown || ai0On) && !players.some(p => p.number === 0)) {
-    newPlayer = new Player(this, `Player-${0}`, 0)
-    newPlayer.isAI = true
-    players.push(newPlayer)
-    ai0On = true
-  }
-
-  if (time >= updateState.nextJoinTime && (key2?.isDown || ai1On) && !players.some(p => p.number === 1)) {
-    newPlayer = new Player(this, `Player-${1}`, 1)
-    newPlayer.isAI = true
-    players.push(newPlayer)
-    ai1On = true
   }
 
   players.forEach(player => {

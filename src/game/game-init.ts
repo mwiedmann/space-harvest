@@ -30,9 +30,12 @@ export const controls: {
   key2?: Phaser.Input.Keyboard.Key
 } = {}
 
+export let titleScreen: Phaser.GameObjects.Image
+
 /** Load all the images we need and assign them names */
 function preload(this: Phaser.Scene) {
   this.load.image('background', 'images/background.jpg')
+  this.load.image('title', 'images/title-screen.png')
   this.load.image('ship0', 'images/ship0.png')
   this.load.image('ship1', 'images/ship1.png')
   this.load.image('bullet0', 'images/bullet0.png')
@@ -54,6 +57,7 @@ function create(this: Phaser.Scene) {
   controls.key2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO)
 
   this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'background')
+  titleScreen = this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'title')
 
   // Global particle managers
   // Need these for particles that will exist after something is destroyed
@@ -97,22 +101,6 @@ function create(this: Phaser.Scene) {
     classType: Alien,
     maxSize: 2,
     runChildUpdate: true
-  })
-
-  this.time.addEvent({
-    delay: gameSettings.asteroidSpawnTime,
-    loop: true,
-    callback: () => {
-      if (minerals.countActive() === 25) {
-        return
-      }
-
-      let rock = asteroids.get() as Asteroid
-
-      if (rock) {
-        rock.spawn()
-      }
-    }
   })
 
   this.physics.world.setBounds(
