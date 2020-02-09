@@ -14,11 +14,19 @@ import {
   alienCrashIntoBase,
   alienCrashIntoPlayer
 } from './alien'
+import {
+  Harvester,
+  harvesterCrashIntoRock,
+  harvesterCrashIntoBase,
+  harvesterHitByBullet,
+  harvesterCollectMineral
+} from './harvester'
 
 export let bulletGroups: Phaser.Physics.Arcade.Group[] = []
 export let minerals: Phaser.Physics.Arcade.Group
 export let asteroids: Phaser.Physics.Arcade.Group
 export let aliens: Phaser.Physics.Arcade.Group
+export let harvesters: Phaser.Physics.Arcade.Group
 export let bases: Phaser.Physics.Arcade.StaticGroup
 
 export let globalFireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
@@ -43,6 +51,7 @@ function preload(this: Phaser.Scene) {
   this.load.image('bullet4', 'images/bullet4.png')
   this.load.spritesheet('mineral', 'images/mineral-sprite.png', { frameWidth: 16, frameHeight: 16 })
   this.load.spritesheet('asteroid', 'images/asteroid-sprite.png', { frameWidth: 64, frameHeight: 64 })
+  this.load.spritesheet('harvester', 'images/harvester-sprite.png', { frameWidth: 24, frameHeight: 24 })
   this.load.image('base', 'images/base.png')
   this.load.image('fire1', 'images/fire1.png')
   this.load.image('rubble', 'images/rubble.png')
@@ -103,6 +112,12 @@ function create(this: Phaser.Scene) {
     runChildUpdate: true
   })
 
+  harvesters = this.physics.add.group({
+    classType: Harvester,
+    maxSize: 2,
+    runChildUpdate: true
+  })
+
   this.physics.world.setBounds(
     -gameSettings.worldBoundEdgeSize,
     -gameSettings.worldBoundEdgeSize,
@@ -122,13 +137,26 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(asteroids, bulletGroups[2], asteroidHitByBullet)
   this.physics.add.collider(asteroids, bulletGroups[3], asteroidHitByBullet)
   this.physics.add.collider(asteroids, bulletGroups[4], asteroidHitByBullet)
+
   this.physics.add.collider(players, asteroids, playerCrashIntoRock)
+  this.physics.add.collider(harvesters, asteroids, undefined, harvesterCrashIntoRock)
+
   this.physics.add.collider(players, bases, undefined, playerCrashIntoBase)
+  this.physics.add.collider(harvesters, bases, undefined, harvesterCrashIntoBase)
+
   this.physics.add.collider(players, bulletGroups[0], undefined, playerHitByBullet)
   this.physics.add.collider(players, bulletGroups[1], undefined, playerHitByBullet)
   this.physics.add.collider(players, bulletGroups[2], undefined, playerHitByBullet)
   this.physics.add.collider(players, bulletGroups[3], undefined, playerHitByBullet)
   this.physics.add.collider(players, bulletGroups[4], undefined, playerHitByBullet)
+
+  this.physics.add.collider(harvesters, bulletGroups[0], undefined, harvesterHitByBullet)
+  this.physics.add.collider(harvesters, bulletGroups[1], undefined, harvesterHitByBullet)
+  this.physics.add.collider(harvesters, bulletGroups[2], undefined, harvesterHitByBullet)
+  this.physics.add.collider(harvesters, bulletGroups[3], undefined, harvesterHitByBullet)
+  this.physics.add.collider(harvesters, bulletGroups[4], undefined, harvesterHitByBullet)
+  this.physics.add.collider(harvesters, minerals, undefined, harvesterCollectMineral)
+
   this.physics.add.collider(bases, bulletGroups[0], undefined, baseHitByBullet)
   this.physics.add.collider(bases, bulletGroups[1], undefined, baseHitByBullet)
   this.physics.add.collider(bases, bulletGroups[2], undefined, baseHitByBullet)
@@ -136,6 +164,7 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(bases, bulletGroups[4], undefined, baseHitByBullet)
   this.physics.add.collider(bases, asteroids, baseHitByRock)
   this.physics.add.collider(bases, minerals, baseCollectMineral)
+
   this.physics.add.collider(aliens, asteroids, undefined, alienCrashIntoRock)
   this.physics.add.collider(aliens, bulletGroups[0], undefined, alienHitByBullet)
   this.physics.add.collider(aliens, bulletGroups[1], undefined, alienHitByBullet)

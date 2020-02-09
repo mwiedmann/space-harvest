@@ -1,25 +1,27 @@
 import * as Phaser from 'phaser'
 import { shipSettings, settingsHelpers, gameSettings } from './consts'
-import { minerals, bases, asteroids, aliens, globalFireParticleManager } from './game-init'
+import { minerals, bases, asteroids, aliens, globalFireParticleManager, harvesters } from './game-init'
 import { Mineral } from './mineral'
 import { Asteroid } from './asteroid'
 import { Base } from './base'
 import { edgeCollideSetPosition, outOfBounds } from './wrappable'
 import { Bullet } from './bullet'
 import { updateState } from './update'
+import { Harvester } from './harvester'
 
 export const players: Player[] = []
 
 function playerCollectMineral(
   playerObj: Phaser.GameObjects.GameObject,
   mineralObj: Phaser.GameObjects.GameObject
-): void {
+): boolean {
   const mineral = mineralObj as Mineral
   const player = playerObj as Player
 
   player.scoreUpdate(mineral.value, true)
-
   mineral.done()
+
+  return false
 }
 
 export function playerCrashIntoRock(
@@ -94,13 +96,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.body.stop()
 
     this.fireParticleManager = scene.add.particles(`fire1`)
-
-    // this.setCollideWorldBounds(true)
-    // // Typing error? Doesn't work without this but says is readoly
-    // const db: any = this.body
-    // db.onWorldBounds = true
   }
 
+  harvester: Harvester | undefined
   base: Base | undefined
 
   spawnParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
@@ -154,6 +152,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.energy = gameSettings.playerStartingEnergy
     this.energyUpdate(0) // Just to update the UI
     this.shipsUpate(1)
+
+    // Give a harvester
+    this.harvester = harvesters.get(this.baseX, this.baseY, this.number.toString())
   }
 
   shipsUpate(change: number) {
@@ -165,6 +166,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.energy += change
     this.energyRect.fillColor = this.energy <= 25 ? 0xff0000 : this.energy <= 50 ? 0xffd800 : 0x00ff00
     this.energyRect.width = gameSettings.energyBarWidth * (this.energy / gameSettings.playerStartingEnergy)
+
+    if (this.energy <= 50 && this.harvester) {
+      this.harvester.destroyed()
+      this.harvester = undefined
+    }
   }
 
   scoreUpdate(points: number, showFloatText?: boolean, playerDied?: boolean) {
@@ -207,6 +213,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    */
   destroyed() {
     this.base?.done()
+    this.harvester?.destroyed()
     this.base = undefined
     this.scoreText.destroy()
     this.shipsText.destroy()
@@ -236,6 +243,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       const { x: newX, y: newY } = edgeCollideSetPosition(this.x, this.y)
       this.setPosition(newX, newY)
     }
+
+    if (this.harvester?.dead) {
+      this.harvester.update(time, delta)
+    }
   }
 
   objectCloseEnoughForAI(obj: Phaser.GameObjects.GameObject) {
@@ -251,7 +262,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const allTargets = [
       ...aliens.children.getArray().filter(a => a.active),
       ...asteroids.children.getArray().filter(a => a.active),
-      ...minerals.children.getArray().filter(a => a.active)
+      ...minerals.children.getArray().filter(a => a.active),
+      ...harvesters.children.getArray().filter(a => a.active && (a as Harvester).playerNumber !== this.number)
     ]
 
     let target: Phaser.GameObjects.Sprite | Phaser.GameObjects.Image

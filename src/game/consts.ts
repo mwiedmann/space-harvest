@@ -12,6 +12,16 @@ export const shipSettings = {
   bulletLifetime: 1000
 }
 
+export const harvesterSettings = {
+  angularVelocity: 135,
+  angularDrag: 500,
+  acceleration: 30,
+  maxVelocity: 120,
+  drag: 130,
+  deadTime: 10000,
+  baseSpawnAdjustY: -48
+}
+
 export const gameSettings = {
   screenWidth: 1400,
   screenHeight: 800,
