@@ -2,8 +2,7 @@
   "name": "space-harvest",
   "license": "none",
   "author": "Mark Wiedmann <mrwieds@gmail.com>",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.0",
   "homepage": "./",
   "dependencies": {
     "@types/jest": "24.0.23",

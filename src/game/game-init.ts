@@ -21,6 +21,7 @@ import {
   harvesterHitByBullet,
   harvesterCollectMineral
 } from './harvester'
+import { Turret } from './turret'
 
 export let bulletGroups: Phaser.Physics.Arcade.Group[] = []
 export let minerals: Phaser.Physics.Arcade.Group
@@ -28,6 +29,7 @@ export let asteroids: Phaser.Physics.Arcade.Group
 export let aliens: Phaser.Physics.Arcade.Group
 export let harvesters: Phaser.Physics.Arcade.Group
 export let bases: Phaser.Physics.Arcade.StaticGroup
+export let turrets: Phaser.Physics.Arcade.StaticGroup
 
 export let globalFireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 export let globalRubbleParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
@@ -55,6 +57,7 @@ function preload(this: Phaser.Scene) {
   this.load.image('base', 'images/base.png')
   this.load.image('fire1', 'images/fire1.png')
   this.load.image('rubble', 'images/rubble.png')
+  this.load.image('turret', 'images/turret.png')
   this.load.spritesheet('alien', 'images/alien.png', { frameWidth: 32, frameHeight: 32 })
 }
 
@@ -104,6 +107,12 @@ function create(this: Phaser.Scene) {
     classType: Base,
     maxSize: 4,
     runChildUpdate: false
+  })
+
+  turrets = this.physics.add.staticGroup({
+    classType: Turret,
+    maxSize: 10,
+    runChildUpdate: true
   })
 
   aliens = this.physics.add.group({

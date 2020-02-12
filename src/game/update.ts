@@ -171,7 +171,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
       var bullet = bulletGroups[player.number].get(undefined, undefined, player.number.toString()) as Bullet
 
       if (bullet) {
-        bullet.fire(player)
+        bullet.fire(player, shipSettings.bulletLifetime)
 
         player.lastFired = this.time.now + shipSettings.fireRate
       }

@@ -56,3 +56,21 @@ export const settingsHelpers = {
     { x: gameSettings.screenWidth - 400, y: 200 }
   ]
 }
+
+export interface ITurretPositions {
+  startingAngle: number
+  x: number
+  y: number
+}
+
+export const turretSettings = {
+  positions: [
+    { startingAngle: -90, x: 0, y: -54 },
+    { startingAngle: -18, x: 48, y: -17 },
+    { startingAngle: 54, x: 29, y: 40 },
+    { startingAngle: 126, x: -29, y: 40 },
+    { startingAngle: -162, x: -48, y: -17 }
+  ],
+  fireRate: 1000,
+  bulletLifetime: 500
+}

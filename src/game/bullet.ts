@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser'
 import { edgeCollideSetPosition, outOfBounds } from './wrappable'
-import { Player, players } from './player'
+import { players } from './player'
 import { bulletGroups } from './game-init'
 import { shipSettings } from './consts'
 import { Alien } from './alien'
@@ -18,7 +18,7 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
   lifespan = 0
   playerNumber: number
 
-  fire(ship: Player) {
+  fire(ship: Phaser.GameObjects.Image | Phaser.GameObjects.Sprite, lifespan: number) {
     this.setActive(true)
     this.setVisible(true)
 
@@ -29,7 +29,7 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     const newVelocity = this.scene.physics.velocityFromRotation(ship.rotation, shipSettings.bulletSpeed)
     this.setVelocity(newVelocity.x, newVelocity.y)
 
-    this.lifespan = shipSettings.bulletLifetime
+    this.lifespan = lifespan
 
     var emitter = this.particleManager.createEmitter({
       speed: 30,

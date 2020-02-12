@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser'
-import { shipSettings, settingsHelpers, gameSettings } from './consts'
-import { minerals, bases, asteroids, aliens, globalFireParticleManager, harvesters } from './game-init'
+import { shipSettings, settingsHelpers, gameSettings, turretSettings, ITurretPositions } from './consts'
+import { minerals, bases, asteroids, aliens, globalFireParticleManager, harvesters, turrets } from './game-init'
 import { Mineral } from './mineral'
 import { Asteroid } from './asteroid'
 import { Base } from './base'
@@ -8,6 +8,7 @@ import { edgeCollideSetPosition, outOfBounds } from './wrappable'
 import { Bullet } from './bullet'
 import { updateState } from './update'
 import { Harvester } from './harvester'
+import { Turret } from './turret'
 
 export const players: Player[] = []
 
@@ -96,10 +97,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.body.stop()
 
     this.fireParticleManager = scene.add.particles(`fire1`)
+
+    // Get a random list of turret positions to give as bonuses
+    this.bonusTurretPositions = Phaser.Math.RND.shuffle(turretSettings.positions)
   }
 
+  bonusTurretPositions: ITurretPositions[]
   harvester: Harvester | undefined
   base: Base | undefined
+  turrets: Turret[] = []
+  level = 0
 
   spawnParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
   fireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
@@ -153,9 +160,22 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.energyUpdate(0) // Just to update the UI
     this.shipsUpate(1)
 
-    // Give a harvester if doesn't already have one
-    if (!this.harvester) {
+    this.level++
+
+    if (this.level === 3) {
       this.harvester = harvesters.get(this.baseX, this.baseY, this.number.toString())
+    } else {
+      const turretPosition = this.bonusTurretPositions.pop()
+
+      if (turretPosition) {
+        const turret = turrets.get(
+          this.baseX + turretPosition.x,
+          this.baseY + turretPosition.y,
+          this.number.toString()
+        ) as Turret
+        turret.setRangeOfMotion(turretPosition.startingAngle)
+        this.turrets.push()
+      }
     }
   }
 
@@ -217,6 +237,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   destroyed() {
     this.base?.done()
     this.harvester?.destroyed()
+    this.turrets.forEach(t => t.destroy())
     this.base = undefined
     this.scoreText.destroy()
     this.shipsText.destroy()
@@ -266,7 +287,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       ...aliens.children.getArray().filter(a => a.active),
       ...asteroids.children.getArray().filter(a => a.active),
       ...minerals.children.getArray().filter(a => a.active),
-      ...harvesters.children.getArray().filter(a => a.active && (a as Harvester).playerNumber !== this.number)
+      ...harvesters.children.getArray().filter(a => a.active && (a as Harvester).playerNumber !== this.number),
+      ...players.filter(a => a.active && (a as Player).number !== this.number)
     ]
 
     let target: Phaser.GameObjects.Sprite | Phaser.GameObjects.Image
