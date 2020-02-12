@@ -2,10 +2,10 @@
 export const shipSettings = {
   angularVelocity: 135,
   angularDrag: 500,
-  acceleration: 20,
+  acceleration: 40,
   maxVelocity: 200,
   drag: 130,
-  fireRate: 500,
+  fireRate: 400,
   keyboardTurnRate: 1,
   deadTime: 5000,
   bulletSpeed: 500,
@@ -14,10 +14,10 @@ export const shipSettings = {
 
 export const harvesterSettings = {
   angularVelocity: 135,
-  angularDrag: 500,
-  acceleration: 30,
-  maxVelocity: 120,
-  drag: 130,
+  angularDrag: 1000,
+  acceleration: 60,
+  maxVelocity: 100,
+  drag: 200,
   deadTime: 10000,
   baseSpawnAdjustY: -48
 }

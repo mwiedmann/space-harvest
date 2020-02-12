@@ -194,10 +194,10 @@ export class Harvester extends Phaser.Physics.Arcade.Sprite {
 
     this.particleManager.createEmitter({
       blendMode: 'ADD',
-      lifespan: 400,
+      lifespan: 100,
       maxParticles: 1,
-      alpha: 0.3,
-      scale: { start: 0.5, end: 0 },
+      alpha: 0.2,
+      scale: { start: 2, end: 1 },
       x: this.x - directionVector.x,
       y: this.y - directionVector.y
     })

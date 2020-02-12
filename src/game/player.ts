@@ -153,8 +153,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.energyUpdate(0) // Just to update the UI
     this.shipsUpate(1)
 
-    // Give a harvester
-    this.harvester = harvesters.get(this.baseX, this.baseY, this.number.toString())
+    // Give a harvester if doesn't already have one
+    if (!this.harvester) {
+      this.harvester = harvesters.get(this.baseX, this.baseY, this.number.toString())
+    }
   }
 
   shipsUpate(change: number) {
@@ -167,10 +169,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.energyRect.fillColor = this.energy <= 25 ? 0xff0000 : this.energy <= 50 ? 0xffd800 : 0x00ff00
     this.energyRect.width = gameSettings.energyBarWidth * (this.energy / gameSettings.playerStartingEnergy)
 
-    if (this.energy <= 50 && this.harvester) {
-      this.harvester.destroyed()
-      this.harvester = undefined
-    }
+    // TODO: Should you lose upgrades as you take damage?
+    // if (this.energy <= 50 && this.harvester) {
+    //   this.harvester.destroyed()
+    //   this.harvester = undefined
+    // }
   }
 
   scoreUpdate(points: number, showFloatText?: boolean, playerDied?: boolean) {
@@ -294,7 +297,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       turnAmount = 0.04
     } else {
       // As the AI nears its target, we allow it to turn a bit more or it may fly by
-      turnAmount = Phaser.Math.Distance.Between(this.x, this.y, target.x, target.y) < 200 ? 0.04 : 0.02
+      turnAmount = Phaser.Math.Distance.Between(this.x, this.y, target.x, target.y) < 200 ? 0.06 : 0.04
 
       angle = Phaser.Math.Angle.Between(this.x, this.y, target.x, target.y)
     }
