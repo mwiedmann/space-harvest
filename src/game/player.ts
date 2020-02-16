@@ -174,7 +174,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
           this.number.toString()
         ) as Turret
         turret.setRangeOfMotion(turretPosition.startingAngle)
-        this.turrets.push()
+        this.turrets.push(turret)
       }
     }
   }
@@ -237,7 +237,12 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   destroyed() {
     this.base?.done()
     this.harvester?.destroyed()
-    this.turrets.forEach(t => t.destroy())
+
+    this.turrets.forEach(t => {
+      t.done()
+    })
+    this.turrets = []
+
     this.base = undefined
     this.scoreText.destroy()
     this.shipsText.destroy()

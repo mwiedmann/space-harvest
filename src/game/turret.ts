@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { globalFireParticleManager, asteroids, aliens, harvesters, bulletGroups } from './game-init'
+import { globalFireParticleManager, asteroids, aliens, harvesters, bulletGroups, turrets } from './game-init'
 import { players, Player } from './player'
 import { Harvester } from './harvester'
 import { turretSettings } from './consts'
@@ -75,5 +75,9 @@ export class Turret extends Phaser.Physics.Arcade.Image {
       x: this.x,
       y: this.y
     })
+  }
+
+  done() {
+    turrets.remove(this, true)
   }
 }
