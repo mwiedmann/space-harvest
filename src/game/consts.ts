@@ -24,7 +24,7 @@ export const harvesterSettings = {
 
 export const gameSettings = {
   screenWidth: 1400,
-  screenHeight: 800,
+  screenHeight: 1000,
   worldBoundEdgeSize: 32,
   playerStartingEnergy: 100,
   playerStartingShips: 3,
@@ -52,8 +52,8 @@ export const settingsHelpers = {
   playerStartingLocations: [
     { x: 400, y: 300 },
     { x: gameSettings.screenWidth - 400, y: gameSettings.screenHeight - 300 },
-    { x: 400, y: gameSettings.screenHeight - 200 },
-    { x: gameSettings.screenWidth - 400, y: 200 }
+    { x: 400, y: gameSettings.screenHeight - 300 },
+    { x: gameSettings.screenWidth - 400, y: 300 }
   ]
 }
 

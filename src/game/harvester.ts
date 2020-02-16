@@ -146,9 +146,9 @@ export class Harvester extends Phaser.Physics.Arcade.Sprite {
 
     // If AI is nearing another base or hazard, turn around and don't crash into it
     // This overrides any target
-    const otherPlayer = players.find(p => p.number === (this.playerNumber === 0 ? 1 : 0))
+    const otherPlayerBases = players.filter(p => p.number !== this.playerNumber).map(p => p.base)
 
-    const objectsToAvoid = [otherPlayer?.base, ...asteroids.children.getArray().filter(a => a.active)]
+    const objectsToAvoid = [...otherPlayerBases, ...asteroids.children.getArray().filter(a => a.active)]
       .map(o => o as Phaser.GameObjects.Sprite)
       .filter(o => o && Phaser.Math.Distance.Between(this.x, this.y, o.x, o.y) < 150)
 

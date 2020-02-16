@@ -317,9 +317,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     // If AI is nearing another base, turn around and don't crash into it
     // This overrides any target
-    const otherPlayer = players.find(p => p.number === (this.number === 0 ? 1 : 0))
-    if (otherPlayer && Phaser.Math.Distance.Between(this.x, this.y, otherPlayer.baseX, otherPlayer.baseY) < 250) {
-      const angleToBase = Phaser.Math.Angle.Between(this.x, this.y, otherPlayer.baseX, otherPlayer.baseY)
+    const otherPlayerBases = players
+      .filter(p => p.number !== this.number)
+      .map(p => ({ base: p.base, distance: Phaser.Math.Distance.Between(this.x, this.y, p.baseX, p.baseY) }))
+      .sort((a, b) => a.distance - b.distance)
+
+    const closestBase = otherPlayerBases.length ? otherPlayerBases[0] : undefined
+
+    if (closestBase && closestBase.distance < 250) {
+      const angleToBase = Phaser.Math.Angle.Between(this.x, this.y, closestBase.base!.x, closestBase.base!.y)
       angle = Phaser.Math.Angle.Reverse(angleToBase)
       turnAmount = 0.04
     } else {

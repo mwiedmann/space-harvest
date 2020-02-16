@@ -13,6 +13,8 @@ export const updateState = {
 
 let ai0On = false
 let ai1On = false
+let ai2On = false
+let ai3On = false
 let gameStarted = false
 
 const startGame = (scene: Phaser.Scene) => {
@@ -66,6 +68,8 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
     }
   })
 
+  const key4 = controls.key4!
+  const key3 = controls.key3!
   const key2 = controls.key2!
   const key1 = controls.key1!
 
@@ -83,6 +87,22 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
     newPlayer.isAI = true
     players.push(newPlayer)
     ai1On = true
+    startGame(this)
+  }
+
+  if (time >= updateState.nextJoinTime && (key3?.isDown || ai2On) && !players.some(p => p.number === 2)) {
+    newPlayer = new Player(this, `Player-${2}`, 2)
+    newPlayer.isAI = true
+    players.push(newPlayer)
+    ai2On = true
+    startGame(this)
+  }
+
+  if (time >= updateState.nextJoinTime && (key4?.isDown || ai3On) && !players.some(p => p.number === 3)) {
+    newPlayer = new Player(this, `Player-${3}`, 3)
+    newPlayer.isAI = true
+    players.push(newPlayer)
+    ai3On = true
     startGame(this)
   }
 

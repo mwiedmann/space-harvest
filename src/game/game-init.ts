@@ -38,6 +38,8 @@ export const controls: {
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys
   key1?: Phaser.Input.Keyboard.Key
   key2?: Phaser.Input.Keyboard.Key
+  key3?: Phaser.Input.Keyboard.Key
+  key4?: Phaser.Input.Keyboard.Key
 } = {}
 
 export let titleScreen: Phaser.GameObjects.Image
@@ -48,8 +50,12 @@ function preload(this: Phaser.Scene) {
   this.load.image('title', 'images/title-screen.png')
   this.load.image('ship0', 'images/ship0.png')
   this.load.image('ship1', 'images/ship1.png')
+  this.load.image('ship2', 'images/ship2.png')
+  this.load.image('ship3', 'images/ship3.png')
   this.load.image('bullet0', 'images/bullet0.png')
   this.load.image('bullet1', 'images/bullet1.png')
+  this.load.image('bullet2', 'images/bullet2.png')
+  this.load.image('bullet3', 'images/bullet3.png')
   this.load.image('bullet4', 'images/bullet4.png')
   this.load.spritesheet('mineral', 'images/mineral-sprite.png', { frameWidth: 16, frameHeight: 16 })
   this.load.spritesheet('asteroid', 'images/asteroid-sprite.png', { frameWidth: 64, frameHeight: 64 })
@@ -67,6 +73,8 @@ function create(this: Phaser.Scene) {
   controls.cursors = this.input.keyboard.createCursorKeys()
   controls.key1 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE)
   controls.key2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO)
+  controls.key3 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE)
+  controls.key4 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR)
 
   this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'background')
   titleScreen = this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'title')
