@@ -184,7 +184,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
       case 3:
       case 7:
-      case 13:
         // Add a harvester
         this.harvesters.push(harvesters.get(this.baseX, this.baseY, this.number.toString()))
         break
