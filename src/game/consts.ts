@@ -41,7 +41,8 @@ export const gameSettings = {
   energyBarHeight: 9,
   asteroidSpawnTime: 4000,
   mineralSpawnMin: 1,
-  mineralSpawnMax: 3
+  mineralSpawnMax: 5,
+  asteroidCount: 7
 }
 
 export const settingsHelpers = {
@@ -71,6 +72,7 @@ export const turretSettings = {
     { startingAngle: 126, x: -29, y: 40 },
     { startingAngle: -162, x: -48, y: -17 }
   ],
-  fireRate: 1000,
-  bulletLifetime: 500
+  fireRate: 1500,
+  bulletLifetime: 500,
+  angleRange: 60
 }

@@ -22,14 +22,14 @@ const startGame = (scene: Phaser.Scene) => {
     delay: gameSettings.asteroidSpawnTime,
     loop: true,
     callback: () => {
-      if (minerals.countActive() === 25) {
-        return
-      }
+      if (asteroids.countActive() === 0 && minerals.countActive() <= 5) {
+        for (let i = 0; i < gameSettings.asteroidCount; i++) {
+          let rock = asteroids.get() as Asteroid
 
-      let rock = asteroids.get() as Asteroid
-
-      if (rock) {
-        rock.spawn()
+          if (rock) {
+            rock.spawn()
+          }
+        }
       }
     }
   })

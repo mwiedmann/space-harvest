@@ -4,6 +4,7 @@ import { players, Player } from './player'
 import { Harvester } from './harvester'
 import { turretSettings } from './consts'
 import { Bullet } from './bullet'
+
 export class Turret extends Phaser.Physics.Arcade.Image {
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string) {
     super(scene, x, y, `turret`)
@@ -38,7 +39,7 @@ export class Turret extends Phaser.Physics.Arcade.Image {
       })
       .filter(a => {
         const angleDiff = Phaser.Math.Angle.ShortestBetween(this.startingAngle, Phaser.Math.RadToDeg(a.newAngle))
-        return Math.abs(angleDiff) <= 36
+        return Math.abs(angleDiff) <= turretSettings.angleRange
       })
 
     if (allTargets.length) {

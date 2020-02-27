@@ -131,7 +131,7 @@ function create(this: Phaser.Scene) {
 
   harvesters = this.physics.add.group({
     classType: Harvester,
-    maxSize: 2,
+    maxSize: 12,
     runChildUpdate: true
   })
 

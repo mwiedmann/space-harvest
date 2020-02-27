@@ -103,7 +103,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   bonusTurretPositions: ITurretPositions[]
-  harvester: Harvester | undefined
+  harvesters: Harvester[] = []
   base: Base | undefined
   turrets: Turret[] = []
   level = 0
@@ -162,20 +162,32 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.level++
 
-    if (this.level === 3) {
-      this.harvester = harvesters.get(this.baseX, this.baseY, this.number.toString())
-    } else {
-      const turretPosition = this.bonusTurretPositions.pop()
+    switch (this.level) {
+      case 1:
+      case 2:
+      case 5:
+      case 9:
+      case 11:
+        // Add a turret
+        const turretPosition = this.bonusTurretPositions.pop()
 
-      if (turretPosition) {
-        const turret = turrets.get(
-          this.baseX + turretPosition.x,
-          this.baseY + turretPosition.y,
-          this.number.toString()
-        ) as Turret
-        turret.setRangeOfMotion(turretPosition.startingAngle)
-        this.turrets.push(turret)
-      }
+        if (turretPosition) {
+          const turret = turrets.get(
+            this.baseX + turretPosition.x,
+            this.baseY + turretPosition.y,
+            this.number.toString()
+          ) as Turret
+          turret.setRangeOfMotion(turretPosition.startingAngle)
+          this.turrets.push(turret)
+        }
+        break
+
+      case 3:
+      case 7:
+      case 13:
+        // Add a harvester
+        this.harvesters.push(harvesters.get(this.baseX, this.baseY, this.number.toString()))
+        break
     }
   }
 
@@ -236,7 +248,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
    */
   destroyed() {
     this.base?.done()
-    this.harvester?.destroyed()
+    this.harvesters.forEach(harvester => harvester.destroyed())
+    this.harvesters = []
 
     this.turrets.forEach(t => {
       t.done()
@@ -273,9 +286,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.setPosition(newX, newY)
     }
 
-    if (this.harvester?.dead) {
-      this.harvester.update(time, delta)
-    }
+    this.harvesters.forEach(harvester => {
+      if (harvester.dead) {
+        harvester.update(time, delta)
+      }
+    })
   }
 
   objectCloseEnoughForAI(obj: Phaser.GameObjects.GameObject) {
@@ -379,6 +394,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   /** Respawn a player at their base */
   respawn() {
+    this.setPosition(this.baseX, this.baseY)
     this.respawnEffect()
 
     this.dead = false
@@ -404,7 +420,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       y: this.y
     })
 
-    this.body.reset(this.baseX, this.baseY)
     this.setActive(false)
     this.setVisible(false)
     this.body.stop()
