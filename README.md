@@ -10,7 +10,7 @@ Destroy aliens to release rare super powered minerals.
 
 Asteroids, aliens, and other players can destroy your ship and damage your base. If you run out of ships or your base runs out of energy, its game over.
 
-Every 20,000 points your base will recharge and create you another ship.
+Every 20,000 points your base will recharge, create you another ship, and possibly give your base a bonus. Current bonuses include defensive turrets and auto-piloted mini-harvesters and collect minerals for you.
 
 ## Controls
 
@@ -24,12 +24,8 @@ To get in the game, click a button on any joystick or press spacebar to use the 
 
 ## AI Players
 
-Press '1' or '2' to add in an AI player as player 1 or 2. Add them both in and watch them go at it for fun.
+Press 1, 2, 3, or 4 on the keyboard to add in an AI player in that slot. Add multiple for a challenge or to watch them go at it for fun.
 
-## What's coming next?
+## Where to play
 
-Upgrades - Use some of your collected minerals to upgrade your ship and base. More firepower, bigger collection range, etc.
-
-Different game modes will allow you to set how you will compete.
-
-A solo mode will allow you to compete against the clock or to reach a certain score perhaps.
+[bugslayergames.com](http://www.bugslayergames.com/SpaceHarvest)
