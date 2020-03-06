@@ -263,7 +263,7 @@ export class Harvester extends Phaser.Physics.Arcade.Sprite {
     const player = players.find(p => p.number === this.playerNumber)!
 
     // TODO: Bug where body is null here sometimes
-    this.body?.reset(player.baseX, player.baseY + harvesterSettings.baseSpawnAdjustY)
+    this.body?.reset(player.baseLocation.x, player.baseLocation.y + harvesterSettings.baseSpawnAdjustY)
     this.setActive(false)
     this.setVisible(false)
     this.body.stop()

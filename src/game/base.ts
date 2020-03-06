@@ -45,12 +45,19 @@ export class Base extends Phaser.Physics.Arcade.Image {
     super(scene, 0, 0, 'base')
   }
 
+  baseContainer!: Phaser.GameObjects.Container
+
   playerNumber = 0
 
-  spawn(x: number, y: number) {
+  move(x: number, y: number) {
+    this.body.reset(x, y)
+    this.baseContainer.setPosition(x, y)
+  }
+
+  spawn() {
     this.setActive(true)
     this.setVisible(true)
-    this.body.reset(x, y)
+    this.baseContainer = this.scene.add.container(0, 0)
   }
 
   hitByBullet() {
@@ -82,5 +89,6 @@ export class Base extends Phaser.Physics.Arcade.Image {
     })
 
     bases.remove(this, true)
+    this.baseContainer.destroy()
   }
 }

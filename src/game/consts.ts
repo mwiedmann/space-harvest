@@ -42,7 +42,15 @@ export const gameSettings = {
   asteroidSpawnTime: 4000,
   mineralSpawnMin: 1,
   mineralSpawnMax: 5,
-  asteroidCount: 7
+  asteroidCount: 7,
+  aliensPerWave: 6
+}
+
+export interface IBaseLocation {
+  x: number
+  y: number
+  retreatX: number
+  retreatY: number
 }
 
 export const settingsHelpers = {
@@ -50,12 +58,17 @@ export const settingsHelpers = {
   screenHeightMid: gameSettings.screenHeight / 2,
   worldBoundWidth: gameSettings.screenWidth + 2 * gameSettings.worldBoundEdgeSize,
   worldBoundHeight: gameSettings.screenHeight + 2 * gameSettings.worldBoundEdgeSize,
-  playerStartingLocations: [
-    { x: 400, y: 300 },
-    { x: gameSettings.screenWidth - 400, y: gameSettings.screenHeight - 300 },
-    { x: 400, y: gameSettings.screenHeight - 300 },
-    { x: gameSettings.screenWidth - 400, y: 300 }
-  ]
+  baseLocations: [
+    { x: 400, y: 300, retreatX: -40, retreatY: -40 },
+    {
+      x: gameSettings.screenWidth - 400,
+      y: gameSettings.screenHeight - 300,
+      retreatX: gameSettings.screenWidth + 40,
+      retreatY: gameSettings.screenHeight + 40
+    },
+    { x: 400, y: gameSettings.screenHeight - 300, retreatX: -40, retreatY: gameSettings.screenHeight + 40 },
+    { x: gameSettings.screenWidth - 400, y: 300, retreatX: gameSettings.screenWidth + 40, retreatY: -40 }
+  ] as IBaseLocation[]
 }
 
 export interface ITurretPositions {

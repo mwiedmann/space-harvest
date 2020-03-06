@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser'
-import { globalFireParticleManager, asteroids, aliens, harvesters, bulletGroups, turrets } from './game-init'
+import { asteroids, aliens, harvesters, bulletGroups, turrets } from './game-init'
 import { players, Player } from './player'
 import { Harvester } from './harvester'
 import { turretSettings } from './consts'
@@ -31,7 +31,7 @@ export class Turret extends Phaser.Physics.Arcade.Image {
     ]
       .map(a => {
         const target = a as Phaser.GameObjects.Sprite | Phaser.GameObjects.Image
-        const angle = Phaser.Math.Angle.Between(this.x, this.y, target.x, target.y)
+        const angle = Phaser.Math.Angle.Between(this.xAdj(), this.yAdj(), target.x, target.y)
 
         const newAngle = Phaser.Math.Angle.RotateTo(Phaser.Math.DegToRad(this.angle), angle, 180)
 
@@ -44,8 +44,8 @@ export class Turret extends Phaser.Physics.Arcade.Image {
 
     if (allTargets.length) {
       const newTarget = allTargets.sort((a, b) => {
-        const aDist = Phaser.Math.Distance.Between(this.x, this.y, a.target.x, a.target.y)
-        const bDist = Phaser.Math.Distance.Between(this.x, this.y, b.target.x, b.target.y)
+        const aDist = Phaser.Math.Distance.Between(this.xAdj(), this.yAdj(), a.target.x, a.target.y)
+        const bDist = Phaser.Math.Distance.Between(this.xAdj(), this.yAdj(), b.target.x, b.target.y)
 
         return aDist - bDist
       })[0]
@@ -57,7 +57,7 @@ export class Turret extends Phaser.Physics.Arcade.Image {
         var bullet = bulletGroups[this.playerNumber].get(undefined, undefined, this.playerNumber.toString()) as Bullet
 
         if (bullet) {
-          bullet.fire(this, turretSettings.bulletLifetime)
+          bullet.fire(this.xAdj(), this.yAdj(), this.rotation, turretSettings.bulletLifetime)
 
           this.lastShotTime = time
         }
@@ -65,17 +65,12 @@ export class Turret extends Phaser.Physics.Arcade.Image {
     }
   }
 
-  /** Play the death explosion, reset the harvester, and update some death settings/timers */
-  deathEffects() {
-    globalFireParticleManager.createEmitter({
-      speed: 50,
-      blendMode: 'ADD',
-      lifespan: 700,
-      maxParticles: 15,
-      scale: 0.7,
-      x: this.x,
-      y: this.y
-    })
+  xAdj() {
+    return this.parentContainer.x + this.x
+  }
+
+  yAdj() {
+    return this.parentContainer.y + this.y
   }
 
   done() {

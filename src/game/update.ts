@@ -1,9 +1,10 @@
-import { bulletGroups, aliens, controls, minerals, asteroids, titleScreen } from './game-init'
+import { bulletGroups, aliens, controls, minerals, asteroids, titleScreen, bosses } from './game-init'
 import { shipSettings, gameSettings } from './consts'
 import { players, Player } from './player'
 import { Bullet } from './bullet'
 import { Alien, alienData } from './alien'
 import { Asteroid } from './asteroid'
+import { Boss } from './boss'
 
 const stickSensitivity = 0.3
 
@@ -17,23 +18,22 @@ let ai2On = false
 let ai3On = false
 let gameStarted = false
 
+export type IBossState = 'dormant' | 'entering' | 'set' | 'destroyed'
+interface IWaveData {
+  waveNumber: number
+  bossState: IBossState
+  bossPhaseTime: number
+  alienCount: number
+}
+
+export let waveData: IWaveData = {
+  waveNumber: 0,
+  bossState: 'dormant',
+  bossPhaseTime: 0,
+  alienCount: 0
+}
+
 const startGame = (scene: Phaser.Scene) => {
-  scene.time.addEvent({
-    delay: gameSettings.asteroidSpawnTime,
-    loop: true,
-    callback: () => {
-      if (asteroids.countActive() === 0 && minerals.countActive() <= 5) {
-        for (let i = 0; i < gameSettings.asteroidCount; i++) {
-          let rock = asteroids.get() as Asteroid
-
-          if (rock) {
-            rock.spawn()
-          }
-        }
-      }
-    }
-  })
-
   titleScreen.destroy()
 
   gameStarted = true
@@ -74,6 +74,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
   const key1 = controls.key1!
 
   // Add AI players
+  // TODO: These 4 sections are so similar they need to be refactored
   if (time >= updateState.nextJoinTime && (key1?.isDown || ai0On) && !players.some(p => p.number === 0)) {
     newPlayer = new Player(this, `Player-${0}`, 0)
     newPlayer.isAI = true
@@ -106,8 +107,47 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
     startGame(this)
   }
 
+  // Everything after this is checking for wave events, player actions, and spawning new objects.
+  // Skip it if the game hasn't started yet.
   if (!gameStarted) {
     return
+  }
+
+  // If the boss is dormant, check if we need to advance to the next wave
+  if (
+    waveData.bossState === 'dormant' &&
+    asteroids.countActive() === 0 &&
+    minerals.countActive() === 0 &&
+    aliens.countActive() === 0
+  ) {
+    // Go to the next wave
+    waveData.waveNumber++
+
+    // Every 5 waves, we have a boss level
+    if (waveData.waveNumber % 5 === 0) {
+      waveData.bossPhaseTime = time
+      waveData.bossState = 'entering'
+      let boss = bosses.get() as Boss
+      boss.spawn()
+    } else {
+      // This is a standard wave
+      // Reset the alien count and spawn asteroids
+      waveData.alienCount = 0
+      for (let i = 0; i < gameSettings.asteroidCount; i++) {
+        let rock = asteroids.get() as Asteroid
+
+        if (rock) {
+          rock.spawn()
+        }
+      }
+    }
+  }
+
+  // Check boss status
+  if (waveData.bossState === 'entering' && time - waveData.bossPhaseTime >= 5000) {
+    waveData.bossState = 'set'
+  } else if (waveData.bossState === 'destroyed' && time - waveData.bossPhaseTime >= 5000) {
+    waveData.bossState = 'dormant'
   }
 
   // Set the time for the 1st alien spawn
@@ -120,14 +160,22 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
   if (alienData.nextAlienSpawn <= this.time.now) {
     alienData.nextAlienSpawn =
       this.time.now + Phaser.Math.RND.integerInRange(gameSettings.alienSpawnMinTime, gameSettings.alientSpawnMaxTime)
+
+    // Don't spawn aliens during a boss phase
+    if (waveData.bossState !== 'dormant' || waveData.alienCount >= gameSettings.aliensPerWave) {
+      return
+    }
+
     const alien = aliens.get() as Alien
 
     if (alien) {
+      waveData.alienCount++
       alien.spawn()
     }
   }
 
-  players.forEach(player => {
+  // Loop through the players and check their controls
+  players.forEach((player: Player) => {
     player.update(time, delta)
 
     // Destroy the player's base if they run out of energy
@@ -191,7 +239,7 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
       var bullet = bulletGroups[player.number].get(undefined, undefined, player.number.toString()) as Bullet
 
       if (bullet) {
-        bullet.fire(player, shipSettings.bulletLifetime)
+        bullet.fire(player.x, player.y, player.rotation, shipSettings.bulletLifetime)
 
         player.lastFired = this.time.now + shipSettings.fireRate
       }

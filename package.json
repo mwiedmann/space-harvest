@@ -1,6 +1,6 @@
 {
   "name": "space-harvest",
-  "license": "none",
+  "license": "MIT",
   "author": "Mark Wiedmann <mrwieds@gmail.com>",
   "version": "0.2.0",
   "homepage": "./",

@@ -1,12 +1,12 @@
 import * as Phaser from 'phaser'
-import { shipSettings, settingsHelpers, gameSettings, turretSettings, ITurretPositions } from './consts'
+import { shipSettings, settingsHelpers, gameSettings, turretSettings, ITurretPositions, IBaseLocation } from './consts'
 import { minerals, bases, asteroids, aliens, globalFireParticleManager, harvesters, turrets } from './game-init'
 import { Mineral } from './mineral'
 import { Asteroid } from './asteroid'
 import { Base } from './base'
 import { edgeCollideSetPosition, outOfBounds } from './wrappable'
 import { Bullet } from './bullet'
-import { updateState } from './update'
+import { updateState, waveData } from './update'
 import { Harvester } from './harvester'
 import { Turret } from './turret'
 
@@ -75,7 +75,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this)
     scene.physics.add.existing(this)
 
-    this.setPosition(this.baseX, this.baseY)
+    this.setPosition(this.baseLocation.x, this.baseLocation.y)
     this.setAngularDrag(shipSettings.angularDrag)
     this.setDrag(shipSettings.drag)
     this.setMaxVelocity(shipSettings.maxVelocity, shipSettings.maxVelocity)
@@ -83,7 +83,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const pb = this.body as Phaser.Physics.Arcade.Body
     pb.setGravity(0, 0)
 
-    // this.body.mass = 4
     scene.physics.add.overlap(this, minerals, playerCollectMineral, undefined, scene)
 
     // Player starts "dead" and can't move/fire for a few moments
@@ -104,7 +103,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   bonusTurretPositions: ITurretPositions[]
   harvesters: Harvester[] = []
-  base: Base | undefined
+  base!: Base
+
+  baseLocation!: IBaseLocation
+
   turrets: Turret[] = []
   level = 0
 
@@ -122,36 +124,44 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   lastFired = 0
 
-  baseX: number = 0
-  baseY: number = 0
-
   diedTime: number
   dead = true
   isAI = false
 
   createBase(playerNumber: number) {
-    const baseLocation = settingsHelpers.playerStartingLocations[playerNumber]
-    this.baseX = baseLocation.x
-    this.baseY = baseLocation.y
+    this.baseLocation = settingsHelpers.baseLocations[playerNumber]
     this.base = bases.get() as Base
     this.base.playerNumber = playerNumber
-    this.base.spawn(baseLocation.x, baseLocation.y)
 
-    this.scoreText = this.scene.add.text(this.baseX - 32, this.baseY - 32, this.score.toString(), {
+    this.base.spawn()
+
+    // If we are in a boss wave, the base may need to spawn off screen
+    if (waveData.bossState === 'set' || waveData.bossState === 'entering') {
+      this.base.move(this.baseLocation.retreatX, this.baseLocation.retreatY)
+    } else {
+      this.base.move(this.baseLocation.x, this.baseLocation.y)
+    }
+
+    this.scoreText = this.scene.add.text(-32, -32, this.score.toString(), {
       color: 'yellow'
     })
-    this.shipsText = this.scene.add.text(this.baseX - 33, this.baseY + 20, '', {
+    this.base.baseContainer.add(this.scoreText)
+
+    this.shipsText = this.scene.add.text(-33, 20, '', {
       color: 'yellow'
     })
+    this.base.baseContainer.add(this.shipsText)
+
     this.shipsUpate(0) // Just to update UI
     this.energyRect = this.scene.add.rectangle(
-      this.baseX + 11,
-      this.baseY + 27,
+      11,
+      27,
       gameSettings.energyBarWidth,
       gameSettings.energyBarHeight,
       0 // Doesn't let me change color later if I dont' specify something here
     )
     this.energyUpdate(0) // Just to update UI
+    this.base.baseContainer.add(this.energyRect)
   }
 
   giveBonus() {
@@ -172,20 +182,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         const turretPosition = this.bonusTurretPositions.pop()
 
         if (turretPosition) {
-          const turret = turrets.get(
-            this.baseX + turretPosition.x,
-            this.baseY + turretPosition.y,
-            this.number.toString()
-          ) as Turret
+          const turret = turrets.get(turretPosition.x, turretPosition.y, this.number.toString()) as Turret
           turret.setRangeOfMotion(turretPosition.startingAngle)
           this.turrets.push(turret)
+          this.base.baseContainer.add(turret)
         }
         break
 
       case 3:
       case 7:
         // Add a harvester
-        this.harvesters.push(harvesters.get(this.baseX, this.baseY, this.number.toString()))
+        this.harvesters.push(harvesters.get(this.baseLocation.x, this.baseLocation.y, this.number.toString()))
         break
     }
   }
@@ -199,12 +206,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.energy += change
     this.energyRect.fillColor = this.energy <= 25 ? 0xff0000 : this.energy <= 50 ? 0xffd800 : 0x00ff00
     this.energyRect.width = gameSettings.energyBarWidth * (this.energy / gameSettings.playerStartingEnergy)
-
-    // TODO: Should you lose upgrades as you take damage?
-    // if (this.energy <= 50 && this.harvester) {
-    //   this.harvester.destroyed()
-    //   this.harvester = undefined
-    // }
   }
 
   scoreUpdate(points: number, showFloatText?: boolean, playerDied?: boolean) {
@@ -255,7 +256,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     })
     this.turrets = []
 
-    this.base = undefined
     this.scoreText.destroy()
     this.shipsText.destroy()
     this.energyRect.destroy()
@@ -290,6 +290,18 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         harvester.update(time, delta)
       }
     })
+
+    if (waveData.bossState === 'entering') {
+      const xd = this.base.x > this.baseLocation.retreatX ? -2 : 0
+      const yd = this.base.y > this.baseLocation.retreatY ? -2 : 0
+
+      this.base.move(this.base.x + xd, this.base.y + yd)
+    } else if (waveData.bossState === 'destroyed') {
+      const xd = this.base.x < this.baseLocation.x ? 2 : 0
+      const yd = this.base.y < this.baseLocation.y ? 2 : 0
+
+      this.base.move(this.base.x + xd, this.base.y + yd)
+    }
   }
 
   objectCloseEnoughForAI(obj: Phaser.GameObjects.GameObject) {
@@ -333,7 +345,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // This overrides any target
     const otherPlayerBases = players
       .filter(p => p.number !== this.number)
-      .map(p => ({ base: p.base, distance: Phaser.Math.Distance.Between(this.x, this.y, p.baseX, p.baseY) }))
+      .map(p => ({
+        base: p.base,
+        distance: Phaser.Math.Distance.Between(this.x, this.y, p.baseLocation.x, p.baseLocation.y)
+      }))
       .sort((a, b) => a.distance - b.distance)
 
     const closestBase = otherPlayerBases.length ? otherPlayerBases[0] : undefined
@@ -393,13 +408,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   /** Respawn a player at their base */
   respawn() {
-    this.setPosition(this.baseX, this.baseY)
+    this.setPosition(this.baseLocation.x, this.baseLocation.y)
     this.respawnEffect()
 
     this.dead = false
     this.diedTime = 0
     this.setActive(true)
     this.setVisible(true)
+    this.body.stop()
+    this.body.enable = true
   }
 
   /** Call when a player dies */
@@ -422,6 +439,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setActive(false)
     this.setVisible(false)
     this.body.stop()
+    this.body.enable = false
+    this.setPosition(this.baseLocation.x, this.baseLocation.y)
 
     this.dead = true
     this.diedTime = this.scene.time.now

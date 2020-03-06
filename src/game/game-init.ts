@@ -22,6 +22,7 @@ import {
   harvesterCollectMineral
 } from './harvester'
 import { Turret } from './turret'
+import { Boss, bossHitByBullet, bossCrashIntoPlayer } from './boss'
 
 export let bulletGroups: Phaser.Physics.Arcade.Group[] = []
 export let minerals: Phaser.Physics.Arcade.Group
@@ -29,6 +30,7 @@ export let asteroids: Phaser.Physics.Arcade.Group
 export let aliens: Phaser.Physics.Arcade.Group
 export let harvesters: Phaser.Physics.Arcade.Group
 export let bases: Phaser.Physics.Arcade.StaticGroup
+export let bosses: Phaser.Physics.Arcade.StaticGroup
 export let turrets: Phaser.Physics.Arcade.StaticGroup
 
 export let globalFireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
@@ -65,6 +67,7 @@ function preload(this: Phaser.Scene) {
   this.load.image('rubble', 'images/rubble.png')
   this.load.image('turret', 'images/turret.png')
   this.load.spritesheet('alien', 'images/alien.png', { frameWidth: 32, frameHeight: 32 })
+  this.load.spritesheet('boss', 'images/boss.png', { frameWidth: 128, frameHeight: 128 })
 }
 
 /** Create all the physics groups we need and setup colliders between the ones we want to interact. */
@@ -129,6 +132,12 @@ function create(this: Phaser.Scene) {
     runChildUpdate: true
   })
 
+  bosses = this.physics.add.staticGroup({
+    classType: Boss,
+    maxSize: 1,
+    runChildUpdate: true
+  })
+
   harvesters = this.physics.add.group({
     classType: Harvester,
     maxSize: 12,
@@ -190,6 +199,12 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(aliens, minerals, undefined, alienCollectMineral)
   this.physics.add.collider(aliens, bases, alienCrashIntoBase)
   this.physics.add.collider(aliens, players, undefined, alienCrashIntoPlayer)
+
+  this.physics.add.collider(bosses, bulletGroups[0], undefined, bossHitByBullet)
+  this.physics.add.collider(bosses, bulletGroups[1], undefined, bossHitByBullet)
+  this.physics.add.collider(bosses, bulletGroups[2], undefined, bossHitByBullet)
+  this.physics.add.collider(bosses, bulletGroups[3], undefined, bossHitByBullet)
+  this.physics.add.collider(bosses, players, undefined, bossCrashIntoPlayer)
 }
 
 export const startGame = () => {
@@ -204,7 +219,6 @@ export const startGame = () => {
     physics: {
       default: 'arcade',
       arcade: {
-        // gravity: { y: 300 },
         debug: false
       }
     },

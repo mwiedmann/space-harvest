@@ -3,7 +3,6 @@ import { edgeCollideSetPosition, outOfBounds } from './wrappable'
 import { players } from './player'
 import { bulletGroups } from './game-init'
 import { shipSettings } from './consts'
-import { Alien } from './alien'
 
 export class Bullet extends Phaser.Physics.Arcade.Image {
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string) {
@@ -18,15 +17,15 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
   lifespan = 0
   playerNumber: number
 
-  fire(ship: Phaser.GameObjects.Image | Phaser.GameObjects.Sprite, lifespan: number) {
+  fire(x: number, y: number, rotation: number, lifespan: number) {
     this.setActive(true)
     this.setVisible(true)
 
-    this.setAngle(ship.rotation)
-    this.setPosition(ship.x, ship.y)
-    this.body.reset(ship.x, ship.y)
+    this.setAngle(rotation)
+    this.setPosition(x, y)
+    this.body.reset(x, y)
 
-    const newVelocity = this.scene.physics.velocityFromRotation(ship.rotation, shipSettings.bulletSpeed)
+    const newVelocity = this.scene.physics.velocityFromRotation(rotation, shipSettings.bulletSpeed)
     this.setVelocity(newVelocity.x, newVelocity.y)
 
     this.lifespan = lifespan
@@ -41,7 +40,7 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     emitter.startFollow(this)
   }
 
-  fireAlien(alien: Alien, targetPlayerChance: number) {
+  fireAlien(alien: Phaser.GameObjects.Sprite, targetPlayerChance: number) {
     this.setActive(true)
     this.setVisible(true)
 
@@ -53,7 +52,7 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
 
     if (Phaser.Math.RND.integerInRange(0, 100) <= targetPlayerChance) {
       // Target a player
-      if (players.length > 0) {
+      if (players.filter(p => !p.dead).length > 0) {
         const player = Phaser.Math.RND.pick(players)
         newVelocity = this.scene.physics.velocityFromAngle(
           Phaser.Math.RadToDeg(
