@@ -61,7 +61,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     var bullet = bulletGroups[4].get(undefined, undefined, '4') as Bullet
 
     if (bullet) {
-      bullet.fireAlien(this, 50)
+      bullet.fireAlien(this, 50, 1.25)
     }
 
     this.nextShootTime = this.scene.time.now + Phaser.Math.RND.integerInRange(250, 1000)

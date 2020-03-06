@@ -40,7 +40,7 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     emitter.startFollow(this)
   }
 
-  fireAlien(alien: Phaser.GameObjects.Sprite, targetPlayerChance: number) {
+  fireAlien(alien: Phaser.GameObjects.Sprite, targetPlayerChance: number, lifespanAdjust = 1) {
     this.setActive(true)
     this.setVisible(true)
 
@@ -69,7 +69,7 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     }
 
     this.setVelocity(newVelocity.x, newVelocity.y)
-    this.lifespan = shipSettings.bulletLifetime
+    this.lifespan = shipSettings.bulletLifetime * lifespanAdjust
 
     var emitter = this.particleManager.createEmitter({
       speed: 20,
