@@ -2,9 +2,9 @@
 export const shipSettings = {
   angularVelocity: 135,
   angularDrag: 500,
-  acceleration: 40,
+  acceleration: 1000,
   maxVelocity: 200,
-  drag: 130,
+  drag: 110,
   fireRate: 400,
   keyboardTurnRate: 1,
   deadTime: 5000,

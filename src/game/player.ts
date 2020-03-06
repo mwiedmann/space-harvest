@@ -372,10 +372,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Slow the AI down a tad, not full throttle
     const unitVelocity = this.scene.physics.velocityFromRotation(this.rotation, speedRatio)
-    this.setVelocity(
-      this.body.velocity.x + unitVelocity.x * shipSettings.acceleration,
-      this.body.velocity.y + unitVelocity.y * shipSettings.acceleration
-    )
+    this.setVelocity(this.body.velocity.x + unitVelocity.x * 40, this.body.velocity.y + unitVelocity.y * 40)
     this.thrustEffect()
   }
 

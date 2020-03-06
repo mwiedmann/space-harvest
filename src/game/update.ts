@@ -224,11 +224,10 @@ export function update(this: Phaser.Scene, time: number, delta: number) {
           ? 0.5
           : 0
       const unitVelocity = this.physics.velocityFromRotation(player.rotation, amount)
-      player.setVelocity(
-        player.body.velocity.x + unitVelocity.x * shipSettings.acceleration,
-        player.body.velocity.y + unitVelocity.y * shipSettings.acceleration
-      )
+      player.setAcceleration(unitVelocity.x * shipSettings.acceleration, unitVelocity.y * shipSettings.acceleration)
       player.thrustEffect()
+    } else {
+      player.setAcceleration(0, 0)
     }
 
     const fireButtonPressed =
