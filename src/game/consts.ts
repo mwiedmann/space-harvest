@@ -42,6 +42,9 @@ export const gameSettings = {
   asteroidSpawnTime: 4000,
   mineralSpawnMin: 1,
   mineralSpawnMax: 5,
+  bossMineralSpawnMin: 12,
+  bossMineralSpawnMax: 20,
+  bossHealth: 20,
   asteroidCount: 7,
   aliensPerWave: 6
 }
@@ -59,15 +62,15 @@ export const settingsHelpers = {
   worldBoundWidth: gameSettings.screenWidth + 2 * gameSettings.worldBoundEdgeSize,
   worldBoundHeight: gameSettings.screenHeight + 2 * gameSettings.worldBoundEdgeSize,
   baseLocations: [
-    { x: 400, y: 300, retreatX: -40, retreatY: -40 },
+    { x: 400, y: 300, retreatX: -100, retreatY: -100 },
     {
       x: gameSettings.screenWidth - 400,
       y: gameSettings.screenHeight - 300,
-      retreatX: gameSettings.screenWidth + 40,
-      retreatY: gameSettings.screenHeight + 40
+      retreatX: gameSettings.screenWidth + 100,
+      retreatY: gameSettings.screenHeight + 100
     },
-    { x: 400, y: gameSettings.screenHeight - 300, retreatX: -40, retreatY: gameSettings.screenHeight + 40 },
-    { x: gameSettings.screenWidth - 400, y: 300, retreatX: gameSettings.screenWidth + 40, retreatY: -40 }
+    { x: 400, y: gameSettings.screenHeight - 300, retreatX: -100, retreatY: gameSettings.screenHeight + 100 },
+    { x: gameSettings.screenWidth - 400, y: 300, retreatX: gameSettings.screenWidth + 100, retreatY: -100 }
   ] as IBaseLocation[]
 }
 

@@ -117,7 +117,7 @@ function create(this: Phaser.Scene) {
   bases = this.physics.add.staticGroup({
     classType: Base,
     maxSize: 4,
-    runChildUpdate: false
+    runChildUpdate: true
   })
 
   turrets = this.physics.add.staticGroup({

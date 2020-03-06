@@ -3,7 +3,7 @@ import { Bullet } from './bullet'
 import { bulletGroups, minerals, globalFireParticleManager, bosses } from './game-init'
 import { Mineral } from './mineral'
 import { Player } from './player'
-import { settingsHelpers } from './consts'
+import { settingsHelpers, gameSettings } from './consts'
 import { waveData } from './update'
 
 // TODO: Not sure why the params are reversed on this one.
@@ -49,7 +49,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     this.setActive(true)
     this.setVisible(true)
 
-    this.health = 10
+    this.health = gameSettings.bossHealth
   }
 
   move(x: number, y: number) {
@@ -87,7 +87,7 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  done(spawnMineral = false) {
+  done() {
     globalFireParticleManager.createEmitter({
       speed: 50,
       blendMode: 'ADD',
@@ -97,11 +97,15 @@ export class Boss extends Phaser.Physics.Arcade.Sprite {
       y: this.y
     })
 
-    if (spawnMineral) {
+    const nuggets = Math.ceil(
+      Phaser.Math.RND.integerInRange(gameSettings.bossMineralSpawnMin, gameSettings.bossMineralSpawnMax)
+    )
+
+    for (let i = 0; i < nuggets; i++) {
       let mineral = minerals.get() as Mineral
 
       if (mineral) {
-        mineral.spawn(this.x, this.y, 4)
+        mineral.spawn(this.x, this.y)
       }
     }
 

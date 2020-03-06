@@ -4,7 +4,8 @@ import { Bullet } from './bullet'
 import { Asteroid } from './asteroid'
 import { Mineral } from './mineral'
 import { players } from './player'
-import { gameSettings } from './consts'
+import { gameSettings, IBaseLocation } from './consts'
+import { waveData } from './update'
 
 export function baseHitByBullet(
   baseObj: Phaser.GameObjects.GameObject,
@@ -46,6 +47,7 @@ export class Base extends Phaser.Physics.Arcade.Image {
   }
 
   baseContainer!: Phaser.GameObjects.Container
+  baseLocation!: IBaseLocation
 
   playerNumber = 0
 
@@ -76,6 +78,21 @@ export class Base extends Phaser.Physics.Arcade.Image {
 
   hitByPlayer() {
     players.find(p => p.number === this.playerNumber)?.energyUpdate(gameSettings.baseHitByPlayerEnergyPenalty)
+  }
+
+  update() {
+    // TODO: Refactor this to use proper direction calc
+    if (waveData.bossState === 'entering') {
+      const xd = this.x === this.baseLocation.retreatX ? 0 : this.x > this.baseLocation.retreatX ? -2 : 2
+      const yd = this.y === this.baseLocation.retreatY ? 0 : this.y > this.baseLocation.retreatY ? -2 : 2
+
+      this.move(this.x + xd, this.y + yd)
+    } else if (waveData.bossState === 'destroyed') {
+      const xd = this.x === this.baseLocation.x ? 0 : this.x < this.baseLocation.x ? 2 : -2
+      const yd = this.y === this.baseLocation.y ? 0 : this.y < this.baseLocation.y ? 2 : -2
+
+      this.move(this.x + xd, this.y + yd)
+    }
   }
 
   done() {

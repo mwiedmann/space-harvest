@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser'
 import { shipSettings, settingsHelpers, gameSettings, turretSettings, ITurretPositions, IBaseLocation } from './consts'
-import { minerals, bases, asteroids, aliens, globalFireParticleManager, harvesters, turrets } from './game-init'
+import { minerals, bases, asteroids, aliens, globalFireParticleManager, harvesters, turrets, bosses } from './game-init'
 import { Mineral } from './mineral'
 import { Asteroid } from './asteroid'
 import { Base } from './base'
@@ -9,6 +9,7 @@ import { Bullet } from './bullet'
 import { updateState, waveData } from './update'
 import { Harvester } from './harvester'
 import { Turret } from './turret'
+import { Boss } from './boss'
 
 export const players: Player[] = []
 
@@ -131,6 +132,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   createBase(playerNumber: number) {
     this.baseLocation = settingsHelpers.baseLocations[playerNumber]
     this.base = bases.get() as Base
+    this.base.baseLocation = this.baseLocation
     this.base.playerNumber = playerNumber
 
     this.base.spawn()
@@ -290,18 +292,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         harvester.update(time, delta)
       }
     })
-
-    if (waveData.bossState === 'entering') {
-      const xd = this.base.x > this.baseLocation.retreatX ? -2 : 0
-      const yd = this.base.y > this.baseLocation.retreatY ? -2 : 0
-
-      this.base.move(this.base.x + xd, this.base.y + yd)
-    } else if (waveData.bossState === 'destroyed') {
-      const xd = this.base.x < this.baseLocation.x ? 2 : 0
-      const yd = this.base.y < this.baseLocation.y ? 2 : 0
-
-      this.base.move(this.base.x + xd, this.base.y + yd)
-    }
   }
 
   objectCloseEnoughForAI(obj: Phaser.GameObjects.GameObject) {
@@ -319,7 +309,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       ...asteroids.children.getArray().filter(a => a.active),
       ...minerals.children.getArray().filter(a => a.active),
       ...harvesters.children.getArray().filter(a => a.active && (a as Harvester).playerNumber !== this.number),
-      ...players.filter(a => a.active && (a as Player).number !== this.number)
+      ...bosses.children.getArray().filter(a => a.active)
+      // ...players.filter(a => a.active && (a as Player).number !== this.number)
     ]
 
     let target: Phaser.GameObjects.Sprite | Phaser.GameObjects.Image
@@ -341,21 +332,41 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     let turnAmount: number
     let angle: number
 
-    // If AI is nearing another base, turn around and don't crash into it
+    // If AI is nearing another base or boss, turn around and don't crash into it
     // This overrides any target
-    const otherPlayerBases = players
-      .filter(p => p.number !== this.number)
-      .map(p => ({
-        base: p.base,
-        distance: Phaser.Math.Distance.Between(this.x, this.y, p.baseLocation.x, p.baseLocation.y)
-      }))
-      .sort((a, b) => a.distance - b.distance)
+    const avoidThese: { obstacle: Phaser.Physics.Arcade.Image; distance: number }[] = [
+      ...players
+        .filter(p => p.number !== this.number)
+        .map(p => ({
+          obstacle: p.base,
+          distance: Phaser.Math.Distance.Between(this.x, this.y, p.base.x, p.base.y)
+        })),
+      ...bosses.children
+        .getArray()
+        .filter(a => a.active)
+        .map(b => {
+          const boss = b as Boss
+          return {
+            obstacle: boss,
+            distance: Phaser.Math.Distance.Between(this.x, this.y, boss.x, boss.y)
+          }
+        })
+        .sort((a, b) => a.distance - b.distance)
+    ]
 
-    const closestBase = otherPlayerBases.length ? otherPlayerBases[0] : undefined
+    const closestObstacle = avoidThese.length ? avoidThese[0] : undefined
 
-    if (closestBase && closestBase.distance < 250) {
-      const angleToBase = Phaser.Math.Angle.Between(this.x, this.y, closestBase.base!.x, closestBase.base!.y)
-      angle = Phaser.Math.Angle.Reverse(angleToBase)
+    // TODO: Something is not quite right. AI still crashes into bases when it should have time to turn away
+    // Best guess is that the angle calcs are right but translating then back into the player with setAngle
+    // is wrong somehow. Maybe Phaser's angle system is rotated but the Math.Angle calcs are not?
+    if (closestObstacle && closestObstacle.distance < 250) {
+      const angleToObstacle = Phaser.Math.Angle.Between(
+        this.x,
+        this.y,
+        closestObstacle.obstacle.x,
+        closestObstacle.obstacle.y
+      )
+      angle = Phaser.Math.Angle.Reverse(angleToObstacle)
       turnAmount = 0.04
     } else {
       // As the AI nears its target, we allow it to turn a bit more or it may fly by
@@ -365,14 +376,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     const newAngle = Phaser.Math.Angle.RotateTo(Phaser.Math.DegToRad(this.angle), angle, turnAmount)
-    this.setAngle(Phaser.Math.RadToDeg(newAngle))
+    this.setRotation(newAngle)
 
+    // TODO: The velocity of the AI needs to be refactored more like the player accelaration
     // Normal speed for AI is a little slower or they are too chaotic.
     const speedRatio = 0.25
 
     // Slow the AI down a tad, not full throttle
     const unitVelocity = this.scene.physics.velocityFromRotation(this.rotation, speedRatio)
-    this.setVelocity(this.body.velocity.x + unitVelocity.x * 40, this.body.velocity.y + unitVelocity.y * 40)
+    this.setVelocity(this.body.velocity.x + unitVelocity.x * 30, this.body.velocity.y + unitVelocity.y * 30)
     this.thrustEffect()
   }
 
