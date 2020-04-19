@@ -35,6 +35,7 @@ export let turrets: Phaser.Physics.Arcade.StaticGroup
 
 export let globalFireParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
 export let globalRubbleParticleManager: Phaser.GameObjects.Particles.ParticleEmitterManager
+export let music: Phaser.Sound.BaseSound
 
 export const controls: {
   cursors?: Phaser.Types.Input.Keyboard.CursorKeys
@@ -42,6 +43,7 @@ export const controls: {
   key2?: Phaser.Input.Keyboard.Key
   key3?: Phaser.Input.Keyboard.Key
   key4?: Phaser.Input.Keyboard.Key
+  music?: Phaser.Input.Keyboard.Key
 } = {}
 
 export let titleScreen: Phaser.GameObjects.Image
@@ -68,6 +70,7 @@ function preload(this: Phaser.Scene) {
   this.load.image('turret', 'images/turret.png')
   this.load.spritesheet('alien', 'images/alien.png', { frameWidth: 32, frameHeight: 32 })
   this.load.spritesheet('boss', 'images/boss.png', { frameWidth: 128, frameHeight: 128 })
+  this.load.audio('music', 'sounds/space-harvest-music.mp3')
 }
 
 /** Create all the physics groups we need and setup colliders between the ones we want to interact. */
@@ -78,6 +81,7 @@ function create(this: Phaser.Scene) {
   controls.key2 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO)
   controls.key3 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE)
   controls.key4 = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR)
+  controls.music = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.M)
 
   this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'background')
   titleScreen = this.add.image(settingsHelpers.screenWidthMid, settingsHelpers.screenHeightMid, 'title')
@@ -205,6 +209,16 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(bosses, bulletGroups[2], undefined, bossHitByBullet)
   this.physics.add.collider(bosses, bulletGroups[3], undefined, bossHitByBullet)
   this.physics.add.collider(bosses, players, undefined, bossCrashIntoPlayer)
+
+  music = this.sound.add('music', { loop: true, volume: 0.25 })
+  music.play()
+  controls.music.on('down', () => {
+    if (music.isPlaying) {
+      music.pause()
+    } else {
+      music.resume()
+    }
+  })
 }
 
 export const startGame = () => {
